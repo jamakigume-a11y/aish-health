@@ -1167,23 +1167,10 @@
             </tr>
           </thead>
           <tbody id="caseTableBody">
-            <tr class="default-case">
-              <td><strong>Priya</strong><br><span style="color: #95a5a6;">Age: 28</span></td>
-              <td>Imphal</td>
-              <td><span class="symptom-badge">Vomiting</span><span class="symptom-badge">Abdominal Pain</span></td>
-              <td><span class="severity-badge severity-high">Critical</span></td>
-              <td><span style="color: #e74c3c; font-weight: 700;">Active</span></td>
-              <td>Oct 16</td>
-              <td></td>
-            </tr>
-            <tr class="default-case">
-              <td><strong>Lakshmi</strong><br><span style="color: #95a5a6;">Age: 31</span></td>
-              <td>Aizawl</td>
-              <td><span class="symptom-badge">Fever</span><span class="symptom-badge">Nausea</span></td>
-              <td><span class="severity-badge severity-high">Critical</span></td>
-              <td><span style="color: #e74c3c; font-weight: 700;">Active</span></td>
-              <td>Oct 17</td>
-              <td></td>
+            <tr id="loadingRow">
+              <td colspan="8" style="text-align:center; color:#95a5a6; padding:32px; font-family:'Poppins',sans-serif;">
+                <span style="font-size:24px;">🔄</span><br>Loading cases from database...
+              </td>
             </tr>
           </tbody>
         </table>
@@ -1691,7 +1678,7 @@
 
     const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:3000/api'
-      : 'https://aish-health.onrender.com/api';
+      : 'https://aish-health-1.onrender.com/api';
     let serverAvailable = false;
     
     async function checkServerConnection() {
@@ -1717,10 +1704,12 @@
         return cases;
       }
       try {
-        const response = await fetch(`${API_URL}/cases`);
+        // cache: 'no-store' forces fresh data every time, never uses a cached response
+        const response = await fetch(`${API_URL}/cases`, { cache: 'no-store' });
         if (!response.ok) throw new Error('Failed to fetch cases');
         const data = await response.json();
         cases = data.map(c => ({ ...c, _id: c._id, synced: true }));
+        saveToStorage('healthCases', cases); // keep localStorage in sync as offline backup
         serverAvailable = true;
         updateDashboard(); renderCaseTable(); updateMapMarkers();
         return cases;
@@ -1792,11 +1781,18 @@
 
     function renderCaseTable() {
       const tbody = document.getElementById('caseTableBody');
-      const existingRows = tbody.querySelectorAll('tr:not(.default-case)');
-      existingRows.forEach(row => row.remove());
+      // Wipe ALL rows - DB is the single source of truth, no hardcoded defaults mixed in
+      tbody.innerHTML = '';
       const severityMap = { high: 'severity-high', medium: 'severity-medium', low: 'severity-low' };
       const severityText = { high: 'Critical', medium: 'Medium', low: 'Low' };
       const isAdmin = currentUser && currentUser.role === 'admin';
+
+      if (cases.length === 0) {
+        const emptyRow = tbody.insertRow();
+        emptyRow.innerHTML = `<td colspan="8" style="text-align:center; color:#95a5a6; padding:32px; font-family:'Poppins',sans-serif;">No cases reported yet. Be the first to report a case.</td>`;
+        return;
+      }
+
       cases.forEach((caseData, index) => {
         const row = tbody.insertRow(0);
         row.innerHTML = `
@@ -1859,10 +1855,26 @@
       if (currentEditIndex === null) return;
       const updatedCase = { ...cases[currentEditIndex], name: document.getElementById('editPatientName').value, age: parseInt(document.getElementById('editPatientAge').value), location: document.getElementById('editPatientLocation').value, symptoms: document.getElementById('editPatientSymptoms').value, waterSource: document.getElementById('editWaterSource').value, severity: document.getElementById('editSeverity').value, status: document.getElementById('editStatus').value };
       if (updatedCase._id && serverAvailable && isOnline) {
-        try { await updateCase(updatedCase._id, updatedCase); cases[currentEditIndex] = updatedCase; showNotification('✓ Case updated in database', 'success'); }
-        catch (error) { cases[currentEditIndex] = updatedCase; saveToStorage('healthCases', cases); showNotification('⚠ Update saved locally', 'warning'); }
-      } else { cases[currentEditIndex] = updatedCase; saveToStorage('healthCases', cases); showNotification('⚠ Update saved locally', 'warning'); }
-      updateDashboard(); renderCaseTable(); updateMapMarkers(); closeEditModal();
+        try {
+          await updateCase(updatedCase._id, updatedCase);
+          showNotification('✓ Case updated in database', 'success');
+          closeEditModal();
+          await fetchAllCases(); // re-fetch so all users see fresh state
+        }
+        catch (error) {
+          cases[currentEditIndex] = updatedCase;
+          saveToStorage('healthCases', cases);
+          updateDashboard(); renderCaseTable(); updateMapMarkers();
+          showNotification('⚠ Update saved locally', 'warning');
+          closeEditModal();
+        }
+      } else {
+        cases[currentEditIndex] = updatedCase;
+        saveToStorage('healthCases', cases);
+        updateDashboard(); renderCaseTable(); updateMapMarkers();
+        showNotification('⚠ Update saved locally', 'warning');
+        closeEditModal();
+      }
     });
 
     document.getElementById('editCaseModal').addEventListener('click', (e) => { if (e.target.id === 'editCaseModal') closeEditModal(); });
@@ -2147,14 +2159,16 @@
 
       if (isOnline) {
         try {
-          const savedCase = await createCase(newCase);
-          cases.push(savedCase);
+          await createCase(newCase);
+          // Re-fetch fresh data from DB so all users see the same state
+          await fetchAllCases();
           showNotification('✓ Case reported and saved to database', 'success');
         } catch (error) {
           cases.push(newCase);
           syncQueue.push(newCase);
           saveToStorage('syncQueue', syncQueue);
           saveToStorage('healthCases', cases);
+          updateDashboard(); renderCaseTable(); updateMapMarkers();
           showNotification('⚠ Case saved locally (will sync when server available)', 'warning');
         }
       } else {
@@ -2162,6 +2176,7 @@
         syncQueue.push(newCase);
         saveToStorage('syncQueue', syncQueue);
         saveToStorage('healthCases', cases);
+        updateDashboard(); renderCaseTable(); updateMapMarkers();
         showNotification('⚠ Case saved locally (will sync when online)', 'warning');
       }
       
@@ -2174,7 +2189,7 @@
       switchTab('dashboard');
     });
 
-    document.querySelectorAll('#caseTableBody tr').forEach(row => row.classList.add('default-case'));
+    // All rows now come from DB only - no hardcoded defaults
 
     const savedUser = loadFromStorage('currentUser');
     if (savedUser) {
@@ -2366,6 +2381,18 @@
     // Ping immediately when page loads, then every 10 minutes
     pingServer();
     setInterval(pingServer, 10 * 60 * 1000);
+
+    // =============================================
+    // AUTO-REFRESH every 30 seconds
+    // This makes it a proper multi-user system —
+    // when User B submits a case, User A's screen
+    // updates automatically within 30 seconds.
+    // =============================================
+    setInterval(async () => {
+      if (serverAvailable && isOnline) {
+        await fetchAllCases();
+      }
+    }, 30 * 1000);
   </script>
 </body>
 </html>
