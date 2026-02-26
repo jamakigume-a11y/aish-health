@@ -2,28 +2,54 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const crypto = require('crypto'); // built-in Node.js — no install needed
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ─── Middleware ────────────────────────────────────────────────────────────────
-// Handle CORS preflight for ALL routes first
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-app.use(cors());
+app.use(cors({
+  origin: '*', // In production, change to your GitHub Pages URL e.g. 'https://yourusername.github.io'
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type']
+}));
 app.use(express.json());
 
 // ─── MongoDB Connection ────────────────────────────────────────────────────────
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
+
+// ─── Password Hashing (built-in crypto, no extra packages) ────────────────────
+function hashPassword(password) {
+  const salt = process.env.PASSWORD_SALT || 'aish_health_salt_2026';
+  return crypto.createHmac('sha256', salt).update(password).digest('hex');
+}
+
+// ─── User Schema & Model ───────────────────────────────────────────────────────
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, 'Name is required'],
+    trim: true,
+    unique: true
+  },
+  passwordHash: {
+    type: String,
+    required: true
+  },
+  role: {
+    type: String,
+    enum: ['doctor'],
+    default: 'doctor'
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+const User = mongoose.model('User', userSchema);
 
 // ─── Case Schema & Model ───────────────────────────────────────────────────────
 const caseSchema = new mongoose.Schema({
@@ -58,7 +84,7 @@ const caseSchema = new mongoose.Schema({
   },
   waterSource: {
     type: String,
-    enum: ['Well', 'River', 'Pond', 'Municipal', 'Borewell', 'Other'],
+    enum: ['Well', 'River', 'Pond', 'Municipal', 'Borewell', 'Other', 'Tap Water', 'Rainwater'],
     required: [true, 'Water source is required']
   },
   severity: {
@@ -86,6 +112,10 @@ const caseSchema = new mongoose.Schema({
   userId: {
     type: String,
     default: null
+  },
+  reportedBy: {
+    type: String,
+    default: 'Unknown'
   }
 }, {
   timestamps: true
@@ -93,7 +123,67 @@ const caseSchema = new mongoose.Schema({
 
 const Case = mongoose.model('Case', caseSchema);
 
-// ─── Routes ────────────────────────────────────────────────────────────────────
+// ─── AUTH ROUTES ───────────────────────────────────────────────────────────────
+
+// GET all doctor names for the login dropdown (never sends passwords)
+app.get('/api/auth/doctors', async (req, res) => {
+  try {
+    const doctors = await User.find({ role: 'doctor' }, 'name');
+    res.json(doctors);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch doctors' });
+  }
+});
+
+// POST register a new doctor
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, password } = req.body;
+    if (!name || !password) {
+      return res.status(400).json({ error: 'Name and password are required' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+    const formattedName = name.trim().startsWith('Dr.') ? name.trim() : `Dr. ${name.trim()}`;
+    const existing = await User.findOne({ name: formattedName });
+    if (existing) {
+      return res.status(409).json({ error: `"${formattedName}" is already registered. Choose a different name.` });
+    }
+    const newUser = new User({ name: formattedName, passwordHash: hashPassword(password) });
+    await newUser.save();
+    console.log(`✅ New doctor registered: ${formattedName}`);
+    res.status(201).json({ message: 'Account created successfully', name: formattedName });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).json({ error: 'That name is already taken.' });
+    console.error('Register error:', error);
+    res.status(500).json({ error: 'Registration failed', details: error.message });
+  }
+});
+
+// POST login — verify name + password
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { name, password } = req.body;
+    if (!name || !password) {
+      return res.status(400).json({ error: 'Name and password are required' });
+    }
+    const user = await User.findOne({ name });
+    if (!user) {
+      return res.status(401).json({ error: 'Doctor not found. Please register first.' });
+    }
+    if (user.passwordHash !== hashPassword(password)) {
+      return res.status(401).json({ error: 'Wrong password. Please try again.' });
+    }
+    console.log(`✅ Doctor logged in: ${user.name}`);
+    res.json({ message: 'Login successful', name: user.name, role: user.role });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ error: 'Login failed', details: error.message });
+  }
+});
+
+// ─── CASE ROUTES ───────────────────────────────────────────────────────────────
 
 // Health check - frontend calls this to see if backend is alive
 app.get('/api/health', (req, res) => {
