@@ -1198,7 +1198,21 @@
 
     <!-- Report Case -->
     <div id="report" class="section-hidden">
-      <div style="max-width: 900px; margin: 0 auto;">
+
+      <!-- Observer blocked message -->
+      <div id="reportBlockedMessage" style="display:none;">
+        <div class="jarvis-panel">
+          <div class="observer-blocked">
+            <div class="blocked-icon">🔒</div>
+            <h3>Access Restricted</h3>
+            <p>Observers cannot report cases.<br>This feature is only available for <strong>Medical Officers</strong> and <strong>Administrators</strong>.</p>
+            <button class="jarvis-btn" onclick="document.getElementById('logoutBtn').click()">Switch to Medical Officer Login</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actual report form (hidden for observers) -->
+      <div id="reportFormContainer" style="max-width: 900px; margin: 0 auto;">
         <div class="jarvis-panel">
           <h2 style="font-size: 24px; margin-bottom: 10px;">⊕ New Case Report</h2>
           <p style="color: #7f8c8d; margin-bottom: 16px; font-size: 13px;">Enter patient information and symptoms</p>
@@ -1260,7 +1274,7 @@
             <button type="submit" class="jarvis-btn" style="width: 100%; margin-top: 12px;">Submit Report</button>
           </form>
         </div>
-      </div>
+      </div><!-- end reportFormContainer -->
     </div>
 
     <!-- Water Sources -->
@@ -1277,50 +1291,44 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
         <div>
           <h2 style="font-size: 24px; margin-bottom: 8px;">◬ AI Analytics Engine</h2>
-          <p style="font-size: 13px; color: #7f8c8d;">Real-time predictive analysis & insights</p>
+          <p style="font-size: 13px; color: #7f8c8d;">Real-time analysis from live database</p>
         </div>
         <div class="ai-badge">AI-Powered Predictions</div>
       </div>
 
-      <!-- AI Insights Cards -->
+      <!-- AI Insights Cards — filled by updateAnalytics() -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 28px;">
-        <div class="protocol-card" style="background: linear-gradient(135deg, #ffebee 0%, #ffffff 100%);">
+        <div class="protocol-card" id="riskCard" style="background: linear-gradient(135deg, #ffebee 0%, #ffffff 100%);">
           <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
             <div>
               <div style="font-family: 'Poppins', sans-serif; font-size: 11px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Risk Level</div>
-              <div style="font-family: 'Poppins', sans-serif; font-size: 32px; color: #e74c3c; font-weight: 700;">HIGH</div>
+              <div id="riskLevel" style="font-family: 'Poppins', sans-serif; font-size: 32px; color: #e74c3c; font-weight: 700;">—</div>
             </div>
             <div style="font-size: 48px; opacity: 0.6; animation: pulse 2s ease-in-out infinite;">⚠️</div>
           </div>
-          <div style="font-size: 13px; color: #546e7a; line-height: 1.6;">
-            AI detected increasing case trend in Imphal region. Immediate action recommended.
-          </div>
+          <div id="riskDesc" style="font-size: 13px; color: #546e7a; line-height: 1.6;">Loading...</div>
         </div>
 
         <div class="protocol-card" style="background: linear-gradient(135deg, #e8f5e9 0%, #ffffff 100%);">
           <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
             <div>
               <div style="font-family: 'Poppins', sans-serif; font-size: 11px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Next Week Forecast</div>
-              <div style="font-family: 'Poppins', sans-serif; font-size: 32px; color: #27ae60; font-weight: 700;">+12</div>
+              <div id="forecastNum" style="font-family: 'Poppins', sans-serif; font-size: 32px; color: #27ae60; font-weight: 700;">—</div>
             </div>
             <div style="font-size: 48px; opacity: 0.6; animation: pulse 2s ease-in-out infinite;">📈</div>
           </div>
-          <div style="font-size: 13px; color: #546e7a; line-height: 1.6;">
-            Predicted new cases based on current trajectory and seasonal patterns.
-          </div>
+          <div id="forecastDesc" style="font-size: 13px; color: #546e7a; line-height: 1.6;">Loading...</div>
         </div>
 
         <div class="protocol-card" style="background: linear-gradient(135deg, #fff3e0 0%, #ffffff 100%);">
           <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
             <div>
               <div style="font-family: 'Poppins', sans-serif; font-size: 11px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Top Risk Factor</div>
-              <div style="font-family: 'Poppins', sans-serif; font-size: 20px; color: #f57c00; font-weight: 700;">WELLS</div>
+              <div id="topRiskFactor" style="font-family: 'Poppins', sans-serif; font-size: 20px; color: #f57c00; font-weight: 700;">—</div>
             </div>
             <div style="font-size: 48px; opacity: 0.6; animation: pulse 2s ease-in-out infinite;">🪣</div>
           </div>
-          <div style="font-size: 13px; color: #546e7a; line-height: 1.6;">
-            68% of cases linked to well water. Focus containment efforts here.
-          </div>
+          <div id="topRiskDesc" style="font-size: 13px; color: #546e7a; line-height: 1.6;">Loading...</div>
         </div>
       </div>
 
@@ -1334,61 +1342,24 @@
           <div style="font-family: 'Poppins', sans-serif; font-size: 11px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
             🤖 AI Analysis
           </div>
-          <div style="font-size: 14px; color: #2c3e50; line-height: 1.6;">
-            The trend shows exponential growth pattern similar to waterborne outbreak scenarios. Peak expected in 5-7 days. Recommend immediate water quality testing in affected zones.
-          </div>
+          <div id="aiAnalysisText" style="font-size: 14px; color: #2c3e50; line-height: 1.6;">Loading analysis...</div>
         </div>
       </div>
 
-      <!-- Geographic Heat Analysis -->
+      <!-- Geographic Heat Analysis — filled by updateAnalytics() -->
       <div class="jarvis-panel" style="margin-top: 28px;">
         <h2 style="margin-bottom: 20px;">Geographic Heat Analysis</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-          <div class="protocol-card" style="cursor: pointer;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <div style="font-family: 'Poppins', sans-serif; font-size: 14px; color: #2c3e50; font-weight: 600;">Imphal</div>
-              <div style="width: 12px; height: 12px; background: #e74c3c; border-radius: 50%; box-shadow: 0 0 10px #e74c3c; animation: pulse 1s infinite;"></div>
-            </div>
-            <div style="font-family: 'Poppins', sans-serif; font-size: 28px; color: #e74c3c; font-weight: 700; margin-bottom: 8px;">12</div>
-            <div style="font-size: 12px; color: #7f8c8d;">Critical Zone • +40% this week</div>
-          </div>
-
-          <div class="protocol-card" style="cursor: pointer;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <div style="font-family: 'Poppins', sans-serif; font-size: 14px; color: #2c3e50; font-weight: 600;">Guwahati</div>
-              <div style="width: 12px; height: 12px; background: #f57c00; border-radius: 50%; box-shadow: 0 0 10px #f57c00; animation: pulse 1s infinite;"></div>
-            </div>
-            <div style="font-family: 'Poppins', sans-serif; font-size: 28px; color: #f57c00; font-weight: 700; margin-bottom: 8px;">8</div>
-            <div style="font-size: 12px; color: #7f8c8d;">Elevated • +15% this week</div>
-          </div>
-
-          <div class="protocol-card" style="cursor: pointer;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <div style="font-family: 'Poppins', sans-serif; font-size: 14px; color: #2c3e50; font-weight: 600;">Shillong</div>
-              <div style="width: 12px; height: 12px; background: #3498db; border-radius: 50%; box-shadow: 0 0 10px #3498db; animation: pulse 1s infinite;"></div>
-            </div>
-            <div style="font-family: 'Poppins', sans-serif; font-size: 28px; color: #3498db; font-weight: 700; margin-bottom: 8px;">3</div>
-            <div style="font-size: 12px; color: #7f8c8d;">Moderate • Stable</div>
-          </div>
-
-          <div class="protocol-card" style="cursor: pointer;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <div style="font-family: 'Poppins', sans-serif; font-size: 14px; color: #2c3e50; font-weight: 600;">Aizawl</div>
-              <div style="width: 12px; height: 12px; background: #27ae60; border-radius: 50%; box-shadow: 0 0 10px #27ae60; animation: pulse 1s infinite;"></div>
-            </div>
-            <div style="font-family: 'Poppins', sans-serif; font-size: 28px; color: #27ae60; font-weight: 700; margin-bottom: 8px;">0</div>
-            <div style="font-size: 12px; color: #7f8c8d;">Low Risk • No cases</div>
+        <div id="heatGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+          <div style="text-align:center; color:#95a5a6; padding:32px; font-family:'Poppins',sans-serif; grid-column:1/-1;">
+            Loading location data...
           </div>
         </div>
-
         <div style="margin-top: 24px; padding: 20px; background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border-radius: 12px; border: 1px solid #90caf9;">
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
             <div style="font-size: 32px; animation: float 3s ease-in-out infinite;">🤖</div>
             <div style="font-family: 'Poppins', sans-serif; font-size: 14px; color: #2c3e50; font-weight: 700;">AI Recommendation</div>
           </div>
-          <div style="font-size: 14px; color: #546e7a; line-height: 1.6;">
-            Deploy emergency response teams to Imphal immediately. Implement water quality monitoring in Guwahati as preventive measure. Continue surveillance in Shillong. Aizawl protocols are effective - maintain current measures.
-          </div>
+          <div id="aiRecommendation" style="font-size: 14px; color: #546e7a; line-height: 1.6;">Loading recommendations...</div>
         </div>
       </div>
     </div>
@@ -1789,7 +1760,7 @@
     // For local development, use: 'http://localhost:3000/api'
     const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:3000/api'
-      : 'https://YOUR-RENDER-APP-NAME.onrender.com/api'; // ← CHANGE THIS after deploying
+      : 'https://aish-health-1.onrender.com/api';
     let serverAvailable = false;
     
     // Check server availability
@@ -1847,12 +1818,12 @@
         cases = loadFromStorage('healthCases') || [];
         updateDashboard();
         renderCaseTable();
-        updateMapMarkers();
+        updateMapMarkers(); updateAnalytics();
         return cases;
       }
       
       try {
-        const response = await fetch(`${API_URL}/cases`);
+        const response = await fetch(`${API_URL}/cases`, { cache: 'no-store' });
         if (!response.ok) throw new Error('Failed to fetch cases');
         const data = await response.json();
         cases = data.map(c => ({
@@ -1860,10 +1831,11 @@
           _id: c._id,
           synced: true
         }));
+        saveToStorage('healthCases', cases); // keep offline backup in sync
         serverAvailable = true;
         updateDashboard();
         renderCaseTable();
-        updateMapMarkers();
+        updateMapMarkers(); updateAnalytics();
         return cases;
       } catch (error) {
         console.error('Error fetching cases:', error);
@@ -1872,7 +1844,7 @@
         cases = loadFromStorage('healthCases') || [];
         updateDashboard();
         renderCaseTable();
-        updateMapMarkers();
+        updateMapMarkers(); updateAnalytics();
         return cases;
       }
     }
@@ -1966,10 +1938,10 @@
     }
 
     function updateDashboard() {
-      const total = cases.length + 24;
-      const active = cases.filter(c => c.status === 'Active').length + 8;
-      const critical = cases.filter(c => c.severity === 'high').length + 6;
-      const recovered = cases.filter(c => c.status === 'Recovered').length + 14;
+      const total = cases.length;
+      const active = cases.filter(c => c.status === 'Active').length;
+      const critical = cases.filter(c => c.severity === 'high').length;
+      const recovered = cases.filter(c => c.status === 'Recovered').length;
 
       document.getElementById('totalCases').textContent = total;
       document.getElementById('activeCases').textContent = active;
@@ -1979,12 +1951,18 @@
 
     function renderCaseTable() {
       const tbody = document.getElementById('caseTableBody');
-      const existingRows = tbody.querySelectorAll('tr:not(.default-case)');
-      existingRows.forEach(row => row.remove());
+      // Wipe ALL rows — DB is the single source of truth
+      tbody.innerHTML = '';
 
       const severityMap = { high: 'severity-high', medium: 'severity-medium', low: 'severity-low' };
       const severityText = { high: 'Critical', medium: 'Medium', low: 'Low' };
       const isAdmin = currentUser && currentUser.role === 'admin';
+
+      if (cases.length === 0) {
+        const emptyRow = tbody.insertRow();
+        emptyRow.innerHTML = `<td colspan="7" style="text-align:center; color:#95a5a6; padding:32px; font-family:'Poppins',sans-serif;">No cases reported yet.</td>`;
+        return;
+      }
 
       cases.forEach((caseData, index) => {
         const row = tbody.insertRow(0);
@@ -2037,7 +2015,7 @@
         
         renderCaseTable();
         updateDashboard();
-        updateMapMarkers();
+        updateMapMarkers(); updateAnalytics();
       }
     }
     window.deleteCase = deleteCaseFunc;
@@ -2095,8 +2073,9 @@
       if (updatedCase._id && serverAvailable && isOnline) {
         try {
           await updateCase(updatedCase._id, updatedCase);
-          cases[currentEditIndex] = updatedCase;
           showNotification('✓ Case updated in database', 'success');
+          closeEditModal();
+          await fetchAllCases(); // re-fetch so all users see fresh state
         } catch (error) {
           console.error('Error updating case:', error);
           cases[currentEditIndex] = updatedCase;
@@ -2111,7 +2090,7 @@
 
       updateDashboard();
       renderCaseTable();
-      updateMapMarkers();
+      updateMapMarkers(); updateAnalytics();
       closeEditModal();
     });
 
@@ -2122,18 +2101,24 @@
       }
     });
 
+    // Show/hide report form based on role
+    function updateReportTabVisibility() {
+      const isObserver = !currentUser || currentUser.role === 'viewer';
+      document.getElementById('reportFormContainer').style.display = isObserver ? 'none' : 'block';
+      document.getElementById('reportBlockedMessage').style.display = isObserver ? 'block' : 'none';
+    }
+
     function loginUser() {
       document.getElementById('loginModal').classList.remove('active');
       document.getElementById('userBadge').style.display = 'flex';
       document.getElementById('userIcon').textContent = currentUser.icon;
       document.getElementById('userName').textContent = currentUser.name;
-      
       if (currentUser.role === 'admin') {
         document.getElementById('adminBtn').style.display = 'block';
         document.getElementById('actionsHeader').style.display = 'table-cell';
       }
-      
       saveToStorage('currentUser', currentUser);
+      updateReportTabVisibility();
       renderCaseTable();
       showNotification(`✓ Welcome ${currentUser.name}`, 'success');
     }
@@ -2141,138 +2126,222 @@
     function initMap() {
       if (map) return;
       const mapContainer = document.getElementById('map');
-      
       if (!isOnline) {
-        mapContainer.innerHTML = `
-          <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; border-radius: 8px;">
-            <div style="text-align: center; color: #95a5a6;">
-              <div style="font-size: 48px; margin-bottom: 16px;">⚠</div>
-              <div style="font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600;">Map Unavailable</div>
-              <div style="font-size: 12px; margin-top: 8px;">Internet connection required</div>
-            </div>
-          </div>
-        `;
+        mapContainer.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f8f9fa;border-radius:8px;"><div style="text-align:center;color:#95a5a6;"><div style="font-size:48px;margin-bottom:16px;">⚠</div><div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:600;">Map Unavailable</div><div style="font-size:12px;margin-top:8px;">Internet connection required</div></div></div>`;
         return;
       }
-
       try {
-        map = L.map('map').setView([25.5788, 91.8933], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        // Default locations
-        const locations = [
-          { lat: 24.8170, lng: 93.9368, name: 'Imphal', cases: 12, color: '#e74c3c' },
-          { lat: 26.1445, lng: 91.7362, name: 'Guwahati', cases: 8, color: '#e74c3c' },
-          { lat: 25.5788, lng: 91.8933, name: 'Shillong', cases: 3, color: '#3498db' }
-        ];
-
-        locations.forEach(loc => {
-          L.circle([loc.lat, loc.lng], {
-            color: loc.color,
-            fillColor: loc.color,
-            fillOpacity: 0.3,
-            radius: loc.cases * 5000 + 10000
-          }).addTo(map).bindPopup(`<strong>${loc.name}</strong><br>Cases: ${loc.cases}`);
-        });
-
-        // Add user-reported case markers
-        updateMapMarkers();
-      } catch (e) {
-        console.error('Map error:', e);
-      }
+        map = L.map('map').setView([20.5937, 78.9629], 5); // Centre on India
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        updateMapMarkers(); updateAnalytics();
+      } catch (e) { console.error('Map error:', e); }
     }
 
-    // Update map with user-reported cases
+    // ─── Dynamic map: zones sized by real case counts ─────────────────────────
+    let zoneCircles = [];
     function updateMapMarkers() {
       if (!map) return;
-      
-      // Clear existing user markers
-      userMarkers.forEach(marker => map.removeLayer(marker));
+
+      // Remove old user markers
+      userMarkers.forEach(m => map.removeLayer(m));
       userMarkers = [];
 
-      // Add markers for cases with coordinates
+      // Remove old zone circles
+      zoneCircles.forEach(c => map.removeLayer(c));
+      zoneCircles = [];
+
+      // Group cases by location name
+      const locationGroups = {};
       cases.forEach(c => {
-        if (c.lat && c.lng) {
-          const marker = L.marker([c.lat, c.lng], {
-            icon: L.divIcon({
-              className: 'custom-marker',
-              html: `<div style="background: #e74c3c; border-radius: 50%; width: 20px; height: 20px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`,
-              iconSize: [20, 20]
-            })
-          }).addTo(map);
-          
-          marker.bindPopup(`
-            <strong>${c.name}</strong><br>
-            Location: ${c.location}<br>
-            Symptoms: ${c.symptoms}<br>
-            Severity: ${c.severity}<br>
-            Date: ${c.date}
-          `);
-          
-          userMarkers.push(marker);
-        }
+        const key = c.location ? c.location.trim().toLowerCase() : null;
+        if (!key) return;
+        if (!locationGroups[key]) locationGroups[key] = { name: c.location, count: 0, lat: c.lat, lng: c.lng, critical: 0 };
+        locationGroups[key].count++;
+        if (c.severity === 'high') locationGroups[key].critical++;
+        // Use first available coords for this location
+        if (!locationGroups[key].lat && c.lat) { locationGroups[key].lat = c.lat; locationGroups[key].lng = c.lng; }
       });
+
+      // Draw a zone circle for each location that has coords
+      Object.values(locationGroups).forEach(loc => {
+        if (!loc.lat || !loc.lng) return;
+        const color = loc.count >= 10 ? '#e74c3c' : loc.count >= 5 ? '#f57c00' : loc.count >= 2 ? '#3498db' : '#27ae60';
+        const circle = L.circle([loc.lat, loc.lng], {
+          color, fillColor: color, fillOpacity: 0.25,
+          radius: loc.count * 8000 + 15000
+        }).addTo(map);
+        circle.bindPopup(`<strong>${loc.name}</strong><br>Total cases: ${loc.count}<br>Critical: ${loc.critical}`);
+        zoneCircles.push(circle);
+      });
+
+      // Individual case pin markers
+      cases.forEach(c => {
+        if (!c.lat || !c.lng) return;
+        const color = c.severity === 'high' ? '#e74c3c' : c.severity === 'medium' ? '#f57c00' : '#27ae60';
+        const marker = L.marker([c.lat, c.lng], {
+          icon: L.divIcon({
+            className: 'custom-marker',
+            html: `<div style="background:${color};border-radius:50%;width:14px;height:14px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.35);"></div>`,
+            iconSize: [14, 14]
+          })
+        }).addTo(map);
+        marker.bindPopup(`<strong>${c.name}</strong><br>📍 ${c.location}<br>🩺 ${c.symptoms}<br>⚠ ${c.severity}<br>📅 ${c.date}<br>👤 ${c.reportedBy || 'Unknown'}`);
+        userMarkers.push(marker);
+      });
+    }
+
+    // ─── Dynamic chart: real dates + real counts ──────────────────────────────
+    function buildChartData() {
+      // Get last 7 days
+      const days = [];
+      const counts = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        days.push(label);
+        const dayCount = cases.filter(c => c.date === label).length;
+        counts.push(dayCount);
+      }
+      // Simple linear forecast: average daily growth * 7 days
+      const recentAvg = counts.slice(-3).reduce((a, b) => a + b, 0) / 3;
+      const forecast = [];
+      counts.forEach((v, i) => forecast.push(i < 5 ? null : v)); // overlap last 2 days
+      for (let i = 1; i <= 5; i++) forecast.push(Math.round(recentAvg * (1 + i * 0.15)));
+      const forecastLabels = [...days];
+      for (let i = 1; i <= 5; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() + i);
+        forecastLabels.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+      }
+      return { labels: forecastLabels, actual: [...counts, null, null, null, null, null], forecast };
     }
 
     function initChart() {
-      if (chart) return;
       const ctx = document.getElementById('trendChart');
       if (!ctx) return;
-      
+      const { labels, actual, forecast } = buildChartData();
+      if (chart) { chart.destroy(); chart = null; }
       chart = new Chart(ctx, {
         type: 'line',
         data: {
-          labels: ['Oct 13', 'Oct 14', 'Oct 15', 'Oct 16', 'Oct 17', 'Oct 18'],
+          labels,
           datasets: [{
             label: 'Actual Cases',
-            data: [2, 3, 4, 3, 5, 7],
-            borderColor: '#3498db',
-            backgroundColor: 'rgba(52, 152, 219, 0.1)',
-            tension: 0.4,
-            fill: true,
-            borderWidth: 3,
-            pointRadius: 6,
-            pointHoverRadius: 8,
-            pointBackgroundColor: '#3498db',
-            pointBorderColor: '#ffffff',
-            pointBorderWidth: 2
+            data: actual,
+            borderColor: '#3498db', backgroundColor: 'rgba(52,152,219,0.1)',
+            tension: 0.4, fill: true, borderWidth: 3,
+            pointRadius: 6, pointHoverRadius: 8,
+            pointBackgroundColor: '#3498db', pointBorderColor: '#ffffff', pointBorderWidth: 2
           }, {
             label: 'AI Prediction',
-            data: [null, null, null, null, 5, 7, 9, 11],
-            borderColor: '#f57c00',
-            backgroundColor: 'rgba(245, 124, 0, 0.1)',
-            tension: 0.4,
-            fill: true,
-            borderWidth: 3,
+            data: forecast,
+            borderColor: '#f57c00', backgroundColor: 'rgba(245,124,0,0.08)',
+            tension: 0.4, fill: true, borderWidth: 3,
             borderDash: [10, 5],
-            pointRadius: 6,
-            pointHoverRadius: 8,
-            pointBackgroundColor: '#f57c00',
-            pointBorderColor: '#ffffff',
-            pointBorderWidth: 2
+            pointRadius: 5, pointHoverRadius: 7,
+            pointBackgroundColor: '#f57c00', pointBorderColor: '#ffffff', pointBorderWidth: 2
           }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: {
-            mode: 'index',
-            intersect: false,
-          },
-          plugins: {
-            legend: { 
-              labels: { 
-                font: { family: 'Inter', size: 13, weight: '600' }
-              } 
-            }
-          },
-          scales: {
-            y: { beginAtZero: true }
-          }
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { labels: { font: { family: 'Inter', size: 13, weight: '600' } } } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
         }
       });
+    }
+
+    // ─── Master analytics updater — called every time cases change ────────────
+    function updateAnalytics() {
+      if (cases.length === 0) {
+        document.getElementById('riskLevel').textContent = 'LOW';
+        document.getElementById('riskDesc').textContent = 'No cases reported yet.';
+        document.getElementById('forecastNum').textContent = '+0';
+        document.getElementById('forecastDesc').textContent = 'No data to forecast from yet.';
+        document.getElementById('topRiskFactor').textContent = 'N/A';
+        document.getElementById('topRiskDesc').textContent = 'No cases reported yet.';
+        document.getElementById('heatGrid').innerHTML = `<div style="text-align:center;color:#95a5a6;padding:32px;grid-column:1/-1;">No cases in database yet.</div>`;
+        document.getElementById('aiRecommendation').textContent = 'No cases reported yet. System is monitoring.';
+        document.getElementById('aiAnalysisText').textContent = 'No data available yet. Cases will appear here once reported.';
+        return;
+      }
+
+      // ── Risk Level ──
+      const critical = cases.filter(c => c.severity === 'high').length;
+      const active = cases.filter(c => c.status === 'Active').length;
+      const total = cases.length;
+      let riskLevel, riskColor, riskBg;
+      if (critical >= 5 || active / total > 0.6) { riskLevel = 'HIGH'; riskColor = '#e74c3c'; riskBg = 'linear-gradient(135deg,#ffebee 0%,#ffffff 100%)'; }
+      else if (critical >= 2 || active / total > 0.3) { riskLevel = 'MEDIUM'; riskColor = '#f57c00'; riskBg = 'linear-gradient(135deg,#fff3e0 0%,#ffffff 100%)'; }
+      else { riskLevel = 'LOW'; riskColor = '#27ae60'; riskBg = 'linear-gradient(135deg,#e8f5e9 0%,#ffffff 100%)'; }
+      document.getElementById('riskLevel').textContent = riskLevel;
+      document.getElementById('riskLevel').style.color = riskColor;
+      document.getElementById('riskCard').style.background = riskBg;
+      document.getElementById('riskDesc').textContent = `${critical} critical case${critical !== 1 ? 's' : ''}, ${active} active out of ${total} total. ${riskLevel === 'HIGH' ? 'Immediate action recommended.' : riskLevel === 'MEDIUM' ? 'Monitor closely.' : 'Situation under control.'}`;
+
+      // ── Forecast ──
+      const last7 = cases.filter(c => {
+        try { const d = new Date(c.timestamp); return (Date.now() - d) < 7 * 86400000; } catch { return false; }
+      }).length;
+      const forecast = Math.round(last7 * 1.2);
+      document.getElementById('forecastNum').textContent = `+${forecast}`;
+      document.getElementById('forecastDesc').textContent = `Based on ${last7} cases in the last 7 days. Projected trend for next week.`;
+
+      // ── Top Risk Factor (water source) ──
+      const sourceCounts = {};
+      cases.forEach(c => { if (c.waterSource) sourceCounts[c.waterSource] = (sourceCounts[c.waterSource] || 0) + 1; });
+      const topSource = Object.entries(sourceCounts).sort((a, b) => b[1] - a[1])[0];
+      if (topSource) {
+        const pct = Math.round((topSource[1] / total) * 100);
+        document.getElementById('topRiskFactor').textContent = topSource[0].toUpperCase();
+        document.getElementById('topRiskDesc').textContent = `${pct}% of cases (${topSource[1]}) linked to ${topSource[0]}. Focus containment here.`;
+      }
+
+      // ── Geographic Heat Cards ──
+      const locationGroups = {};
+      cases.forEach(c => {
+        const key = c.location ? c.location.trim() : 'Unknown';
+        if (!locationGroups[key]) locationGroups[key] = { count: 0, critical: 0 };
+        locationGroups[key].count++;
+        if (c.severity === 'high') locationGroups[key].critical++;
+      });
+      const sorted = Object.entries(locationGroups).sort((a, b) => b[1].count - a[1].count);
+      const heatGrid = document.getElementById('heatGrid');
+      heatGrid.innerHTML = sorted.map(([loc, data]) => {
+        const color = data.count >= 10 ? '#e74c3c' : data.count >= 5 ? '#f57c00' : data.count >= 2 ? '#3498db' : '#27ae60';
+        const label = data.count >= 10 ? 'Critical Zone' : data.count >= 5 ? 'Elevated' : data.count >= 2 ? 'Moderate' : 'Low Risk';
+        return `<div class="protocol-card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <div style="font-family:'Poppins',sans-serif;font-size:14px;color:#2c3e50;font-weight:600;">${loc}</div>
+            <div style="width:12px;height:12px;background:${color};border-radius:50%;box-shadow:0 0 10px ${color};animation:pulse 1s infinite;"></div>
+          </div>
+          <div style="font-family:'Poppins',sans-serif;font-size:28px;color:${color};font-weight:700;margin-bottom:8px;">${data.count}</div>
+          <div style="font-size:12px;color:#7f8c8d;">${label} • ${data.critical} critical</div>
+        </div>`;
+      }).join('');
+
+      // ── AI Recommendation ──
+      const topLoc = sorted[0];
+      let rec = '';
+      if (topLoc) {
+        const [name, data] = topLoc;
+        if (data.count >= 10) rec += `🚨 Deploy emergency response to ${name} immediately. `;
+        else if (data.count >= 5) rec += `⚠️ Increase surveillance in ${name}. `;
+        else rec += `✅ Monitor ${name} closely. `;
+      }
+      if (topSource) rec += `Focus water testing on ${topSource[0]} sources. `;
+      if (riskLevel === 'HIGH') rec += 'Activate outbreak response protocol.';
+      else if (riskLevel === 'MEDIUM') rec += 'Continue preventive measures and public health advisories.';
+      else rec += 'Maintain current monitoring protocols.';
+      document.getElementById('aiRecommendation').textContent = rec;
+
+      // ── AI Analysis Text ──
+      const recentCount = cases.filter(c => { try { return (Date.now() - new Date(c.timestamp)) < 3 * 86400000; } catch { return false; } }).length;
+      document.getElementById('aiAnalysisText').textContent = `${recentCount} case${recentCount !== 1 ? 's' : ''} reported in the last 3 days. Risk level is ${riskLevel.toLowerCase()}. ${topSource ? `${topSource[0]} is the dominant contamination source at ${Math.round(topSource[1]/total*100)}%.` : ''} ${riskLevel === 'HIGH' ? 'Recommend immediate water quality testing in all affected zones.' : 'Continue monitoring and preventive public health measures.'}`;
+
+      // Refresh chart with real data
+      initChart();
     }
 
     function switchTab(tabName) {
@@ -2288,9 +2357,10 @@
         }
       });
 
-      if (tabName === 'water') setTimeout(() => initMap(), 100);
-      if (tabName === 'analytics') setTimeout(() => initChart(), 100);
+      if (tabName === 'water') setTimeout(() => { initMap(); updateMapMarkers(); }, 100);
+      if (tabName === 'analytics') setTimeout(() => updateAnalytics(), 100);
       if (tabName === 'protocols') updateProtocolsDisplay();
+      if (tabName === 'report') updateReportTabVisibility();
     }
 
     // Character selection
@@ -2596,6 +2666,14 @@
     // Report form
     document.getElementById('reportForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      // Double-lock: block observers even if they somehow see the form
+      if (!currentUser || currentUser.role === 'viewer') {
+        showNotification('❌ Observers cannot report cases', 'error');
+        updateReportTabVisibility();
+        return;
+      }
+
       const symptoms = document.getElementById('selectedSymptoms').value;
       
       if (!symptoms) {
@@ -2635,15 +2713,16 @@
       // Try to save to MongoDB
       if (isOnline) {
         try {
-          const savedCase = await createCase(newCase);
-          cases.push(savedCase);
+          await createCase(newCase);
           showNotification('✓ Case reported and synced to database', 'success');
+          await fetchAllCases(); // re-fetch so all users see fresh data instantly
         } catch (error) {
           // Fallback to local storage
           cases.push(newCase);
           syncQueue.push(newCase);
           saveToStorage('syncQueue', syncQueue);
           saveToStorage('healthCases', cases);
+          updateDashboard(); renderCaseTable(); updateMapMarkers();
           showNotification('⚠ Case saved locally (will sync when server is available)', 'warning');
         }
       } else {
@@ -2651,12 +2730,9 @@
         syncQueue.push(newCase);
         saveToStorage('syncQueue', syncQueue);
         saveToStorage('healthCases', cases);
+        updateDashboard(); renderCaseTable(); updateMapMarkers();
         showNotification('⚠ Case saved locally (will sync when online)', 'warning');
       }
-      
-      updateDashboard();
-      renderCaseTable();
-      updateMapMarkers(); // Update map with new case
       
       document.getElementById('reportForm').reset();
       document.querySelectorAll('.symptom-btn').forEach(b => b.classList.remove('selected'));
@@ -2684,6 +2760,7 @@
         document.getElementById('adminBtn').style.display = 'block';
         document.getElementById('actionsHeader').style.display = 'table-cell';
       }
+      updateReportTabVisibility();
     }
 
     // Check server connection and load cases
@@ -2703,14 +2780,14 @@
           cases = loadFromStorage('healthCases') || [];
           updateDashboard();
           renderCaseTable();
-          updateMapMarkers();
+          updateMapMarkers(); updateAnalytics();
         }
       } else {
         console.log('📱 Backend not available, using offline mode');
         cases = loadFromStorage('healthCases') || [];
         updateDashboard();
         renderCaseTable();
-        updateMapMarkers();
+        updateMapMarkers(); updateAnalytics();
         
         // Show helpful message in console only
         const backendMsg = `
@@ -3585,6 +3662,23 @@ Dysentery is intestinal inflammation causing severe diarrhea with blood and mucu
 
     // Load sync queue
     syncQueue = loadFromStorage('syncQueue') || [];
+
+    // ── Keep Render server awake (ping every 10 mins) ──────────────────
+    function pingServer() {
+      fetch(`${API_URL}/health`, { cache: 'no-store' })
+        .then(() => console.log('✓ Server is awake'))
+        .catch(() => console.log('⚠ Server sleeping, waking up...'));
+    }
+    pingServer();
+    setInterval(pingServer, 10 * 60 * 1000);
+
+    // ── Auto-refresh every 30 seconds for multi-user live sync ─────────
+    // When Doctor B submits a case, Doctor A's screen updates within 30s
+    setInterval(async () => {
+      if (serverAvailable && isOnline) {
+        await fetchAllCases();
+      }
+    }, 30 * 1000);
   </script>
 </body>
 </html>
