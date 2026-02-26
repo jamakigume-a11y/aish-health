@@ -957,30 +957,6 @@
       background: white;
       border-top: 1px solid #e9ecef;
     }
-
-    /* Observer blocked message */
-    .observer-blocked {
-      text-align: center;
-      padding: 60px 40px;
-    }
-    .observer-blocked .blocked-icon {
-      font-size: 80px;
-      margin-bottom: 20px;
-    }
-    .observer-blocked h3 {
-      font-family: 'Poppins', sans-serif;
-      font-size: 22px;
-      color: #e74c3c;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-    }
-    .observer-blocked p {
-      color: #7f8c8d;
-      font-size: 14px;
-      margin-bottom: 24px;
-      line-height: 1.6;
-    }
     
     @media (max-width: 768px) {
       .stats-grid, .character-select { grid-template-columns: 1fr; }
@@ -1038,24 +1014,55 @@
           </div>
         </div>
         
-        <!-- Doctor Login Form -->
+        <!-- Doctor Login / Register Form -->
         <div id="doctorLoginForm" style="display: none; margin-top: 28px;">
           <button id="backBtnDoctor" class="jarvis-btn jarvis-btn-secondary" style="width: 100%; margin-bottom: 20px;">← Return to Selection</button>
-          <div class="form-group">
-            <label>⚕️ Select Your Name</label>
-            <select id="doctorSelect">
-              <option value="">-- Select your name --</option>
-            </select>
+
+          <!-- Tab switcher -->
+          <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+            <button id="showLoginTab" onclick="showDoctorTab('login')" class="jarvis-btn" style="flex:1;">🔑 Login</button>
+            <button id="showRegisterTab" onclick="showDoctorTab('register')" class="jarvis-btn" style="flex:1; background:#e9ecef; color:#546e7a;">📝 Register</button>
           </div>
-          <div class="form-group">
-            <label>🔐 Password</label>
-            <input type="password" id="doctorPassword" placeholder="Enter your password">
+
+          <!-- LOGIN TAB -->
+          <div id="doctorLoginTab">
+            <div class="form-group">
+              <label>⚕️ Select Your Name</label>
+              <select id="doctorSelect">
+                <option value="">-- Select your name --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>🔐 Password</label>
+              <input type="password" id="doctorPassword" placeholder="Enter your password">
+            </div>
+            <div class="error-msg" id="doctorError">❌ Wrong password. Please try again.</div>
+            <button class="jarvis-btn" id="doctorLoginBtn" style="width: 100%;">Authenticate</button>
+            <p style="color: #95a5a6; font-size: 11px; margin-top: 14px; text-align: center;">
+              New here? Click <strong>Register</strong> above to create your account.
+            </p>
           </div>
-          <div class="error-msg" id="doctorError">❌ Wrong password. Please try again.</div>
-          <button class="jarvis-btn" id="doctorLoginBtn" style="width: 100%;">Authenticate</button>
-          <p style="color: #95a5a6; font-size: 11px; margin-top: 14px; text-align: center;">
-            Select your name from the list, then enter your password
-          </p>
+
+          <!-- REGISTER TAB -->
+          <div id="doctorRegisterTab" style="display:none;">
+            <div class="form-group">
+              <label>⚕️ Your Name</label>
+              <input type="text" id="registerName" placeholder="e.g. Priya  (Dr. added automatically)">
+            </div>
+            <div class="form-group">
+              <label>🔐 Create Password</label>
+              <input type="password" id="registerPassword" placeholder="Minimum 6 characters">
+            </div>
+            <div class="form-group">
+              <label>🔐 Confirm Password</label>
+              <input type="password" id="registerConfirm" placeholder="Re-enter your password">
+            </div>
+            <div class="error-msg" id="registerError">❌ Error.</div>
+            <div id="registerSuccess" style="display:none; color:#27ae60; background:#e8f5e9; padding:12px; border-radius:8px; font-size:13px; margin-bottom:12px; border:1px solid #81c784; text-align:center;">
+              ✓ Account created! Switch to Login tab to sign in.
+            </div>
+            <button class="jarvis-btn jarvis-btn-secondary" id="doctorRegisterBtn" style="width: 100%;">Create Account</button>
+          </div>
         </div>
 
         <!-- Admin Login Form -->
@@ -1106,7 +1113,7 @@
 
   <nav>
     <button class="nav-btn active" data-tab="dashboard">◈ Dashboard</button>
-    <button class="nav-btn" data-tab="report" id="reportTabBtn">⊕ Report Case</button>
+    <button class="nav-btn" data-tab="report">⊕ Report Case</button>
     <button class="nav-btn" data-tab="water">≋ Water Sources</button>
     <button class="nav-btn" data-tab="analytics">◬ Analytics</button>
     <button class="nav-btn" data-tab="protocols">⚕ Protocols</button>
@@ -1162,25 +1169,36 @@
               <th>Severity</th>
               <th>Status</th>
               <th>Date</th>
-              <th>Reported By</th>
               <th id="actionsHeader" style="display: none;">Actions</th>
             </tr>
           </thead>
           <tbody id="caseTableBody">
-            <tr id="loadingRow">
-              <td colspan="8" style="text-align:center; color:#95a5a6; padding:32px; font-family:'Poppins',sans-serif;">
-                <span style="font-size:24px;">🔄</span><br>Loading cases from database...
-              </td>
+            <tr class="default-case">
+              <td><strong>Priya</strong><br><span style="color: #95a5a6;">Age: 28</span></td>
+              <td>Imphal</td>
+              <td><span class="symptom-badge">Vomiting</span><span class="symptom-badge">Abdominal Pain</span></td>
+              <td><span class="severity-badge severity-high">Critical</span></td>
+              <td><span style="color: #e74c3c; font-weight: 700;">Active</span></td>
+              <td>Oct 16</td>
+              <td></td>
+            </tr>
+            <tr class="default-case">
+              <td><strong>Lakshmi</strong><br><span style="color: #95a5a6;">Age: 31</span></td>
+              <td>Aizawl</td>
+              <td><span class="symptom-badge">Fever</span><span class="symptom-badge">Nausea</span></td>
+              <td><span class="severity-badge severity-high">Critical</span></td>
+              <td><span style="color: #e74c3c; font-weight: 700;">Active</span></td>
+              <td>Oct 17</td>
+              <td></td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Report Case — FIXED: shows blocked message for observers -->
+    <!-- Report Case -->
     <div id="report" class="section-hidden">
-      <!-- This content is replaced dynamically based on role -->
-      <div id="reportFormContainer" style="max-width: 900px; margin: 0 auto;">
+      <div style="max-width: 900px; margin: 0 auto;">
         <div class="jarvis-panel">
           <h2 style="font-size: 24px; margin-bottom: 10px;">⊕ New Case Report</h2>
           <p style="color: #7f8c8d; margin-bottom: 16px; font-size: 13px;">Enter patient information and symptoms</p>
@@ -1243,20 +1261,6 @@
           </form>
         </div>
       </div>
-
-      <!-- Observer blocked message (hidden by default, shown for observers) -->
-      <div id="reportBlockedMessage" style="display: none;">
-        <div class="jarvis-panel">
-          <div class="observer-blocked">
-            <div class="blocked-icon">🔒</div>
-            <h3>Access Restricted</h3>
-            <p>Observers cannot report cases.<br>This feature is only available for <strong>Medical Officers</strong> and <strong>Administrators</strong>.</p>
-            <button class="jarvis-btn" onclick="document.getElementById('logoutBtn').click()">
-              Switch to Medical Officer Login
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Water Sources -->
@@ -1278,6 +1282,7 @@
         <div class="ai-badge">AI-Powered Predictions</div>
       </div>
 
+      <!-- AI Insights Cards -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 28px;">
         <div class="protocol-card" style="background: linear-gradient(135deg, #ffebee 0%, #ffffff 100%);">
           <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
@@ -1319,6 +1324,7 @@
         </div>
       </div>
 
+      <!-- Chart Section -->
       <div class="jarvis-panel">
         <h2>Case Trend Analysis</h2>
         <div class="chart-container">
@@ -1334,6 +1340,7 @@
         </div>
       </div>
 
+      <!-- Geographic Heat Analysis -->
       <div class="jarvis-panel" style="margin-top: 28px;">
         <h2 style="margin-bottom: 20px;">Geographic Heat Analysis</h2>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
@@ -1345,6 +1352,7 @@
             <div style="font-family: 'Poppins', sans-serif; font-size: 28px; color: #e74c3c; font-weight: 700; margin-bottom: 8px;">12</div>
             <div style="font-size: 12px; color: #7f8c8d;">Critical Zone • +40% this week</div>
           </div>
+
           <div class="protocol-card" style="cursor: pointer;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
               <div style="font-family: 'Poppins', sans-serif; font-size: 14px; color: #2c3e50; font-weight: 600;">Guwahati</div>
@@ -1353,6 +1361,7 @@
             <div style="font-family: 'Poppins', sans-serif; font-size: 28px; color: #f57c00; font-weight: 700; margin-bottom: 8px;">8</div>
             <div style="font-size: 12px; color: #7f8c8d;">Elevated • +15% this week</div>
           </div>
+
           <div class="protocol-card" style="cursor: pointer;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
               <div style="font-family: 'Poppins', sans-serif; font-size: 14px; color: #2c3e50; font-weight: 600;">Shillong</div>
@@ -1361,6 +1370,7 @@
             <div style="font-family: 'Poppins', sans-serif; font-size: 28px; color: #3498db; font-weight: 700; margin-bottom: 8px;">3</div>
             <div style="font-size: 12px; color: #7f8c8d;">Moderate • Stable</div>
           </div>
+
           <div class="protocol-card" style="cursor: pointer;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
               <div style="font-family: 'Poppins', sans-serif; font-size: 14px; color: #2c3e50; font-weight: 600;">Aizawl</div>
@@ -1391,11 +1401,11 @@
           <p style="font-size: 13px; color: #7f8c8d;">Powered by AISH Intelligence Engine</p>
         </div>
         <div class="language-selector">
-          <button class="language-btn active" onclick="changeLanguage('english', this)">English</button>
-          <button class="language-btn" onclick="changeLanguage('tamil', this)">தமிழ்</button>
-          <button class="language-btn" onclick="changeLanguage('malayalam', this)">മലയാളം</button>
-          <button class="language-btn" onclick="changeLanguage('hindi', this)">हिन्दी</button>
-          <button class="language-btn" onclick="changeLanguage('bengali', this)">বাংলা</button>
+          <button class="language-btn active" onclick="changeLanguage('english')">English</button>
+          <button class="language-btn" onclick="changeLanguage('tamil')">தமிழ்</button>
+          <button class="language-btn" onclick="changeLanguage('malayalam')">മലയാളം</button>
+          <button class="language-btn" onclick="changeLanguage('hindi')">हिन्दी</button>
+          <button class="language-btn" onclick="changeLanguage('bengali')">বাংলা</button>
         </div>
       </div>
       <div class="jarvis-panel">
@@ -1494,18 +1504,22 @@
             <label style="font-weight: 600; color: #2c3e50; font-size: 13px; margin-bottom: 8px; display: block;">Patient Name:</label>
             <input type="text" id="editPatientName" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif;">
           </div>
+
           <div style="margin-bottom: 16px;">
             <label style="font-weight: 600; color: #2c3e50; font-size: 13px; margin-bottom: 8px; display: block;">Age:</label>
             <input type="number" id="editPatientAge" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif;">
           </div>
+
           <div style="margin-bottom: 16px;">
             <label style="font-weight: 600; color: #2c3e50; font-size: 13px; margin-bottom: 8px; display: block;">Location:</label>
             <input type="text" id="editPatientLocation" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif;">
           </div>
+
           <div style="margin-bottom: 16px;">
             <label style="font-weight: 600; color: #2c3e50; font-size: 13px; margin-bottom: 8px; display: block;">Symptoms:</label>
             <textarea id="editPatientSymptoms" required rows="3" style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; resize: vertical;"></textarea>
           </div>
+
           <div style="margin-bottom: 16px;">
             <label style="font-weight: 600; color: #2c3e50; font-size: 13px; margin-bottom: 8px; display: block;">Water Source:</label>
             <select id="editWaterSource" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif;">
@@ -1517,6 +1531,7 @@
               <option value="Other">Other</option>
             </select>
           </div>
+
           <div style="margin-bottom: 16px;">
             <label style="font-weight: 600; color: #2c3e50; font-size: 13px; margin-bottom: 8px; display: block;">Severity:</label>
             <select id="editSeverity" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif;">
@@ -1525,6 +1540,7 @@
               <option value="high">High</option>
             </select>
           </div>
+
           <div style="margin-bottom: 20px;">
             <label style="font-weight: 600; color: #2c3e50; font-size: 13px; margin-bottom: 8px; display: block;">Status:</label>
             <select id="editStatus" required style="width: 100%; padding: 12px; border: 2px solid #e9ecef; border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif;">
@@ -1533,8 +1549,9 @@
               <option value="Under Treatment">Under Treatment</option>
             </select>
           </div>
+
           <div style="display: flex; gap: 12px;">
-            <button type="submit" class="jarvis-btn" style="flex: 1;">💾 Save Changes</button>
+            <button type="submit" class="jarvis-btn jarvis-btn-primary" style="flex: 1;">💾 Save Changes</button>
             <button type="button" onclick="closeEditModal()" class="jarvis-btn jarvis-btn-secondary" style="flex: 1;">❌ Cancel</button>
           </div>
         </form>
@@ -1545,31 +1562,18 @@
   <script>
     let currentUser = null;
     let cases = [];
-
-    // =============================================
-    // DOCTORS LIST — Admin can edit this!
-    // Add or remove doctors here.
-    // Each doctor has a name and their own password.
-    // =============================================
-    const DOCTORS = [
-      { name: "Dr. Sharma",    password: "sharma123" },
-      { name: "Dr. Priya",     password: "priya456" },
-      { name: "Dr. Rahul",     password: "rahul789" },
-      { name: "Dr. Meena",     password: "meena321" },
-      { name: "Dr. Arjun",     password: "arjun654" },
-    ];
-
-    // =============================================
-    // ADMIN CREDENTIALS — Change these!
-    // =============================================
-    const ADMIN_USERNAME = "admin";
-    const ADMIN_PASSWORD = "admin@AISH2026";
     let map = null;
     let chart = null;
     let isOnline = navigator.onLine;
     let currentLanguage = 'english';
-    let userMarkers = [];
-    let syncQueue = [];
+    let userMarkers = []; // Store user-added markers
+    let syncQueue = []; // Queue for offline data
+
+    // Firebase-like configuration (using localStorage as fallback)
+    const FIREBASE_CONFIG = {
+      apiKey: "demo-key",
+      projectId: "aish-health-monitoring"
+    };
 
     const translations = {
       english: {
@@ -1598,135 +1602,296 @@
         greeting: "வணக்கம்! நான் டாக்டர் AISH, உங்கள் AI சுகாதார உதவியாளர்.",
         doTitle: "நீங்கள் செய்ய வேண்டியவை",
         dontTitle: "நீங்கள் செய்யக்கூடாதவை",
-        dos: ["குடிப்பதற்கு முன் குறைந்தது 1 நிமிடம் தண்ணீரை கொதிக்க வைக்கவும்","உணவு உண்பதற்கு முன் 20 விநாடிகள் சோப்பால் கைகளை கழுவவும்","குடிநீரை சுத்தமான மூடிய பாத்திரங்களில் சேமிக்கவும்","அறிகுறிகள் தோன்றிய 24 மணி நேரத்திற்குள் புகாரளிக்கவும்","வயிற்றுப்போக்கு ஏற்பட்டால் ORS கரைசலை பயன்படுத்தவும்","கடுமையான அறிகுறிகளுக்கு உடனடியாக மருத்துவ உதவி பெறவும்"],
-        donts: ["தெரியாத ஆதாரங்களிலிருந்து சுத்திகரிக்கப்படாத தண்ணீரை குடிக்காதீர்கள்","நோயுற்ற உள்ளவர்களுடன் பாத்திரங்களை பகிர்ந்து கொள்ளாதீர்கள்","பச்சை அல்லது முழுமையாக சமைக்கப்படாத உணவை உண்ணாதீர்கள்","தொடர்ச்சியான வயிறு அறிகுறிகளை புறக்கணிக்காதீர்கள்","வாந்தி அல்லது வயிற்றுப்போக்கு இருக்கும்போது உணவு தயாரிக்காதீர்கள்","மாசுபட்ட நீர்நிலைகளில் நீந்தாதீர்கள்"],
+        dos: [
+          "குடிப்பதற்கு முன் குறைந்தது 1 நிமிடம் தண்ணீரை கொதிக்க வைக்கவும்",
+          "உணவு உண்பதற்கு முன் 20 விநாடிகள் சோப்பால் கைகளை கழுவவும்",
+          "குடிநீரை சுத்தமான மூடிய பாத்திரங்களில் சேமிக்கவும்",
+          "அறிகுறிகள் தோன்றிய 24 மணி நேரத்திற்குள் புகாரளிக்கவும்",
+          "வயிற்றுப்போக்கு ஏற்பட்டால் ORS கரைசலை பயன்படுத்தவும்",
+          "கடுமையான அறிகுறிகளுக்கு உடனடியாக மருத்துவ உதவி பெறவும்"
+        ],
+        donts: [
+          "தெரியாத ஆதாரங்களிலிருந்து சுத்திகரிக்கப்படாத தண்ணீரை குடிக்காதீர்கள்",
+          "நோயுற்ற உள்ளவர்களுடன் பாத்திரங்களை பகிர்ந்து கொள்ளாதீர்கள்",
+          "பச்சை அல்லது முழுமையாக சமைக்கப்படாத உணவை உண்ணாதீர்கள்",
+          "தொடர்ச்சியான வயிறு அறிகுறிகளை புறக்கணிக்காதீர்கள்",
+          "வாந்தி அல்லது வயிற்றுப்போக்கு இருக்கும்போது உணவு தயாரிக்காதீர்கள்",
+          "மாசுபட்ட நீர்நிலைகளில் நீந்தாதீர்கள்"
+        ],
         tip: "நினைவில் கொள்ளுங்கள்: தடுப்பு சிகிச்சையை விட சிறந்தது! நீரேற்றமாக இருங்கள் மற்றும் நல்ல சுகாதாரத்தை பேணுங்கள்."
       },
       malayalam: {
         greeting: "ഹലോ! ഞാൻ ഡോ. AISH, നിങ്ങളുടെ AI ആരോഗ്യ സഹായി.",
         doTitle: "നിങ്ങൾ ചെയ്യേണ്ടവ",
         dontTitle: "നിങ്ങൾ ചെയ്യരുതാത്തവ",
-        dos: ["കുടിക്കുന്നതിനു മുമ്പ് കുറഞ്ഞത് 1 മിനിറ്റ് വെള്ളം തിളപ്പിക്കുക","ഭക്ഷണം കഴിക്കുന്നതിനു മുമ്പ് 20 സെക്കൻഡ് സോപ്പ് ഉപയോഗിച്ച് കൈ കഴുക്കുക","കുടിവെള്ളം വൃത്തിയുള്ള മൂടിയ പാത്രങ്ങളിൽ സൂക്ഷിക്കുക","ലക്ഷണങ്ങൾ പ്രത്യക്ഷപ്പെട്ട് 24 മണിക്കൂറിനുള്ളിൽ റിപ്പോർട്ട് ചെയ്യുക","വയറിളക്കം ഉണ്ടെങ്കിൽ ORS ലായനി ഉപയോഗിക്കുക","ഗുരുതരമായ ലക്ഷണങ്ങൾക്ക് ഉടൻ വൈദ്യസഹായം തേടുക"],
-        donts: ["അജ്ഞാത സ്രോതസ്സുകളിൽ നിന്ന് ശുദ്ധീകരിക്കാത്ത വെള്ളം കുടിക്കരുത്","രോഗബാധിതരുമായി പാത്രങ്ങൾ പങ്കിടരുത്","അസംസ്കൃതമോ അല്ലെങ്കിൽ പാകം ചെയ്യാത്ത ഭക്ഷണം കഴിക്കരുത്","തുടർച്ചയായ ദഹനസംബന്ധമായ ലക്ഷണങ്ങൾ അവഗണിക്കരുത്","ഛർദ്ദി അല്ലെങ്കിൽ വയറിളക്കം അനുഭവപ്പെടുമ്പോൾ ഭക്ഷണം കൈകാര്യം ചെയ്യരുത്","മലിനമായ ജലാശയങ്ങളിൽ നീന്തരുത്"],
+        dos: [
+          "കുടിക്കുന്നതിനു മുമ്പ് കുറഞ്ഞത് 1 മിനിറ്റ് വെള്ളം തിളപ്പിക്കുക",
+          "ഭക്ഷണം കഴിക്കുന്നതിനു മുമ്പ് 20 സെക്കൻഡ് സോപ്പ് ഉപയോഗിച്ച് കൈ കഴുക്കുക",
+          "കുടിവെള്ളം വൃത്തിയുള്ള മൂടിയ പാത്രങ്ങളിൽ സൂക്ഷിക്കുക",
+          "ലക്ഷണങ്ങൾ പ്രത്യക്ഷപ്പെട്ട് 24 മണിക്കൂറിനുള്ളിൽ റിപ്പോർട്ട് ചെയ്യുക",
+          "വയറിളക്കം ഉണ്ടെങ്കിൽ ORS ലായനി ഉപയോഗിക്കുക",
+          "ഗുരുതരമായ ലക്ഷണങ്ങൾക്ക് ഉടൻ വൈദ്യസഹായം തേടുക"
+        ],
+        donts: [
+          "അജ്ഞാത സ്രോതസ്സുകളിൽ നിന്ന് ശുദ്ധീകരിക്കാത്ത വെള്ളം കുടിക്കരുത്",
+          "രോഗബാധിതരുമായി പാത്രങ്ങൾ പങ്കിടരുത്",
+          "അസംസ്കൃതമോ അല്ലെങ്കിൽ പാകം ചെയ്യാത്ത ഭക്ഷണം കഴിക്കരുത്",
+          "തുടർച്ചയായ ദഹനസംബന്ധമായ ലക്ഷണങ്ങൾ അവഗണിക്കരുത്",
+          "ഛർദ്ദി അല്ലെങ്കിൽ വയറിളക്കം അനുഭവപ്പെടുമ്പോൾ ഭക്ഷണം കൈകാര്യം ചെയ്യരുത്",
+          "മലിനമായ ജലാശയങ്ങളിൽ നീന്തരുത്"
+        ],
         tip: "ഓർക്കുക: പ്രതിരോധം ചികിത്സയേക്കാൾ നല്ലത്! ജലാംശം നിലനിർത്തുകയും നല്ല ശുചിത്വം പാലിക്കുകയും ചെയ്യുക."
       },
       hindi: {
         greeting: "नमस्ते! मैं डॉ. AISH हूं, आपका AI स्वास्थ्य सहायक।",
         doTitle: "आपको क्या करना चाहिए",
         dontTitle: "आपको क्या नहीं करना चाहिए",
-        dos: ["पीने से पहले कम से कम 1 मिनट के लिए पानी उबालें","खाने से पहले 20 सेकंड के लिए साबुन से हाथ धोएं","पीने के पानी को साफ, ढके हुए बर्तनों में रखें","लक्षण दिखने के 24 घंटे के भीतर रिपोर्ट करें","दस्त होने पर ORS घोल का उपयोग करें","गंभीर लक्षणों के लिए तुरंत चिकित्सा सहायता लें"],
-        donts: ["अज्ञात स्रोतों से बिना उपचारित पानी न पिएं","संक्रमित व्यक्तियों के साथ बर्तन साझा न करें","कच्चा या अधपका भोजन न खाएं","लगातार गैस्ट्रोइंटेस्टाइनल लक्षणों को नजरअंदाज न करें","उल्टी या दस्त होने पर भोजन न संभालें","दूषित जल निकायों में तैरें नहीं"],
+        dos: [
+          "पीने से पहले कम से कम 1 मिनट के लिए पानी उबालें",
+          "खाने से पहले 20 सेकंड के लिए साबुन से हाथ धोएं",
+          "पीने के पानी को साफ, ढके हुए बर्तनों में रखें",
+          "लक्षण दिखने के 24 घंटे के भीतर रिपोर्ट करें",
+          "दस्त होने पर ORS घोल का उपयोग करें",
+          "गंभीर लक्षणों के लिए तुरंत चिकित्सा सहायता लें"
+        ],
+        donts: [
+          "अज्ञात स्रोतों से बिना उपचारित पानी न पिएं",
+          "संक्रमित व्यक्तियों के साथ बर्तन साझा न करें",
+          "कच्चा या अधपका भोजन न खाएं",
+          "लगातार गैस्ट्रोइंटेस्टाइनल लक्षणों को नजरअंदाज न करें",
+          "उल्टी या दस्त होने पर भोजन न संभालें",
+          "दूषित जल निकायों में तैरें नहीं"
+        ],
         tip: "याद रखें: रोकथाम इलाज से बेहतर है! हाइड्रेटेड रहें और अच्छी स्वच्छता बनाए रखें।"
       },
       bengali: {
         greeting: "হ্যালো! আমি ডাঃ AISH, আপনার AI স্বাস্থ্য সহায়ক।",
         doTitle: "আপনার যা করা উচিত",
         dontTitle: "আপনার যা করা উচিত নয়",
-        dos: ["পান করার আগে কমপক্ষে ১ মিনিট পানি ফোটান","খাওয়ার আগে ২০ সেকেন্ড সাবান দিয়ে হাত ধুয়ে নিন","পানীয় জল পরিষ্কার, ঢাকনাযুক্ত পাত্রে রাখুন","লক্ষণ দেখা দেওয়ার ২৪ ঘন্টার মধ্যে রিপোর্ট করুন","ডায়রিয়া হলে ORS দ্রবণ ব্যবহার করুন","গুরুতর লক্ষণের জন্য অবিলম্বে চিকিৎসা সহায়তা নিন"],
-        donts: ["অজানা উৎস থেকে অপরিশোধিত পানি পান করবেন না","সংক্রমিত ব্যক্তিদের সাথে পাত্র ভাগ করবেন না","কাঁচা বা আধা রান্না করা খাবার খাবেন না","ক্রমাগত পাচনতন্ত্রের লক্ষণ উপেক্ষা করবেন না","বমি বা ডায়রিয়া হলে খাবার পরিচালনা করবেন না","দূষিত জলাশয়ে সাঁতার কাটবেন না"],
+        dos: [
+          "পান করার আগে কমপক্ষে ১ মিনিট পানি ফোটান",
+          "খাওয়ার আগে ২০ সেকেন্ড সাবান দিয়ে হাত ধুয়ে নিন",
+          "পানীয় জল পরিষ্কার, ঢাকনাযুক্ত পাত্রে রাখুন",
+          "লক্ষণ দেখা দেওয়ার ২৪ ঘন্টার মধ্যে রিপোর্ট করুন",
+          "ডায়রিয়া হলে ORS দ্রবণ ব্যবহার করুন",
+          "গুরুতর লক্ষণের জন্য অবিলম্বে চিকিৎসা সহায়তা নিন"
+        ],
+        donts: [
+          "অজানা উৎস থেকে অপরিশোধিত পানি পান করবেন না",
+          "সংক্রমিত ব্যক্তিদের সাথে পাত্র ভাগ করবেন না",
+          "কাঁচা বা আধা রান্না করা খাবার খাবেন না",
+          "ক্রমাগত পাচনতন্ত্রের লক্ষণ উপেক্ষা করবেন না",
+          "বমি বা ডায়রিয়া হলে খাবার পরিচালনা করবেন না",
+          "দূষিত জলাশয়ে সাঁতার কাটবেন না"
+        ],
         tip: "মনে রাখবেন: প্রতিকারের চেয়ে প্রতিরোধ ভাল! হাইড্রেটেড থাকুন এবং ভাল স্বাস্থ্যবিধি বজায় রাখুন।"
       }
     };
 
-    function changeLanguage(lang, btn) {
+    function changeLanguage(lang) {
       currentLanguage = lang;
       saveToStorage('preferredLanguage', lang);
-      // Update active button in protocols tab only
-      const protocolLangBtns = document.querySelectorAll('#protocols .language-btn');
-      protocolLangBtns.forEach(b => b.classList.remove('active'));
-      if (btn) btn.classList.add('active');
+      
+      document.querySelectorAll('.language-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      event.target.classList.add('active');
+      
       updateProtocolsDisplay();
-      showNotification('Language changed to ' + lang, 'success');
+      showNotification(`Language changed to ${lang}`, 'success');
     }
 
     function updateProtocolsDisplay() {
       const content = translations[currentLanguage];
       const protocolsContainer = document.getElementById('protocolsContent');
+      
       if (protocolsContainer) {
         protocolsContainer.innerHTML = `
           <div style="display: flex; align-items: center; justify-content: center; gap: 32px; margin-bottom: 40px; padding: 32px; background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border-radius: 16px; position: relative; overflow: hidden;">
-            <div class="ai-doctor-avatar">🤖</div>
+            <div class="ai-doctor-avatar">
+              🤖
+            </div>
+            
             <div style="flex: 1; max-width: 600px;">
-              <div class="ai-badge" style="margin-bottom: 16px;">AI-Powered Health Assistant</div>
-              <div style="font-family: 'Poppins', sans-serif; font-size: 20px; color: #2c3e50; font-weight: 700; margin-bottom: 12px;">${content.greeting}</div>
-              <div style="font-size: 14px; color: #546e7a; display: flex; align-items: center;"><span>Analyzing health protocols</span><span class="ai-thinking"><span></span><span></span><span></span></span></div>
+              <div class="ai-badge" style="margin-bottom: 16px;">
+                AI-Powered Health Assistant
+              </div>
+              <div style="font-family: 'Poppins', sans-serif; font-size: 20px; color: #2c3e50; font-weight: 700; margin-bottom: 12px;">
+                ${content.greeting}
+              </div>
+              <div style="font-size: 14px; color: #546e7a; display: flex; align-items: center;">
+                <span>Analyzing health protocols</span>
+                <span class="ai-thinking">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </span>
+              </div>
             </div>
           </div>
+
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
             <div class="protocol-card do-card">
               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3); color: white;">✓</div>
-                <div><div style="color: #27ae60; font-size: 16px; font-family: 'Poppins', sans-serif; font-weight: 700;">${content.doTitle}</div><div style="font-size: 11px; color: #95a5a6; text-transform: uppercase; letter-spacing: 1px;">Recommended Actions</div></div>
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #27ae60 0%, #229954 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3); color: white;">
+                  ✓
+                </div>
+                <div>
+                  <div style="color: #27ae60; font-size: 16px; font-family: 'Poppins', sans-serif; font-weight: 700;">${content.doTitle}</div>
+                  <div style="font-size: 11px; color: #95a5a6; text-transform: uppercase; letter-spacing: 1px;">Recommended Actions</div>
+                </div>
               </div>
-              <ul style="margin-top: 16px; list-style: none; padding: 0;">${content.dos.map((item, i) => `<li style="margin-bottom: 14px; padding-left: 24px; position: relative; animation: slideIn 0.5s ease-out ${i * 0.1}s both; color: #546e7a;"><span style="position: absolute; left: 0; color: #27ae60;">▸</span>${item}</li>`).join('')}</ul>
+              <ul style="margin-top: 16px; list-style: none; padding: 0;">
+                ${content.dos.map((item, i) => `
+                  <li style="margin-bottom: 14px; padding-left: 24px; position: relative; animation: slideIn 0.5s ease-out ${i * 0.1}s both; color: #546e7a;">
+                    <span style="position: absolute; left: 0; color: #27ae60;">▸</span>
+                    ${item}
+                  </li>
+                `).join('')}
+              </ul>
             </div>
+            
             <div class="protocol-card dont-card">
               <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3); color: white;">✗</div>
-                <div><div style="color: #e74c3c; font-size: 16px; font-family: 'Poppins', sans-serif; font-weight: 700;">${content.dontTitle}</div><div style="font-size: 11px; color: #95a5a6; text-transform: uppercase; letter-spacing: 1px;">Actions to Avoid</div></div>
+                <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3); color: white;">
+                  ✗
+                </div>
+                <div>
+                  <div style="color: #e74c3c; font-size: 16px; font-family: 'Poppins', sans-serif; font-weight: 700;">${content.dontTitle}</div>
+                  <div style="font-size: 11px; color: #95a5a6; text-transform: uppercase; letter-spacing: 1px;">Actions to Avoid</div>
+                </div>
               </div>
-              <ul style="margin-top: 16px; list-style: none; padding: 0;">${content.donts.map((item, i) => `<li style="margin-bottom: 14px; padding-left: 24px; position: relative; animation: slideIn 0.5s ease-out ${i * 0.1}s both; color: #546e7a;"><span style="position: absolute; left: 0; color: #e74c3c;">▸</span>${item}</li>`).join('')}</ul>
+              <ul style="margin-top: 16px; list-style: none; padding: 0;">
+                ${content.donts.map((item, i) => `
+                  <li style="margin-bottom: 14px; padding-left: 24px; position: relative; animation: slideIn 0.5s ease-out ${i * 0.1}s both; color: #546e7a;">
+                    <span style="position: absolute; left: 0; color: #e74c3c;">▸</span>
+                    ${item}
+                  </li>
+                `).join('')}
+              </ul>
             </div>
           </div>
-          <div style="padding: 28px; background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border-radius: 12px; border: 2px solid #90caf9; text-align: center;">
+
+          <div style="padding: 28px; background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border-radius: 12px; border: 2px solid #90caf9; text-align: center; position: relative; overflow: hidden; box-shadow: 0 4px 16px rgba(52, 152, 219, 0.2);">
             <div style="font-size: 48px; margin-bottom: 16px; animation: pulse 2s ease-in-out infinite;">💡</div>
             <div style="font-family: 'Poppins', sans-serif; font-size: 12px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">AI Tip of the Day</div>
-            <div style="font-size: 16px; color: #2c3e50; font-weight: 600; line-height: 1.6;">${content.tip}</div>
-          </div>`;
+            <div style="font-size: 16px; color: #2c3e50; font-weight: 600; line-height: 1.6;">
+              ${content.tip}
+            </div>
+          </div>
+        `;
       }
     }
 
+    // MongoDB API Configuration
+    // ⬇️ After deploying to Render, replace this URL with your Render backend URL
+    // Example: 'https://aish-health-backend.onrender.com/api'
+    // For local development, use: 'http://localhost:3000/api'
     const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
       ? 'http://localhost:3000/api'
-      : 'https://aish-health-1.onrender.com/api';
+      : 'https://YOUR-RENDER-APP-NAME.onrender.com/api'; // ← CHANGE THIS after deploying
     let serverAvailable = false;
     
+    // Check server availability
     async function checkServerConnection() {
       try {
-        const response = await fetch(`${API_URL}/health`, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
-        if (response.ok) { serverAvailable = true; return true; }
-      } catch (error) { serverAvailable = false; }
+        const response = await fetch(`${API_URL}/health`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+          serverAvailable = true;
+          console.log('✓ Connected to backend server');
+          return true;
+        }
+      } catch (error) {
+        serverAvailable = false;
+        console.warn('⚠ Backend server not available, using offline mode');
+      }
       return false;
     }
     
+    // MongoDB API Functions
     async function saveToStorage(key, data) {
-      try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) { console.error('Storage error:', e); }
+      try {
+        // Still use localStorage as backup for non-case data
+        if (key !== 'healthCases') {
+          localStorage.setItem(key, JSON.stringify(data));
+          return;
+        }
+        
+        // For cases, save to MongoDB
+        // This is handled by individual case operations now
+        localStorage.setItem(key, JSON.stringify(data)); // Backup
+      } catch (e) {
+        console.error('Storage error:', e);
+      }
     }
 
     function loadFromStorage(key) {
-      try { const data = localStorage.getItem(key); return data ? JSON.parse(data) : null; } catch (e) { return null; }
+      try {
+        const data = localStorage.getItem(key);
+        return data ? JSON.parse(data) : null;
+      } catch (e) {
+        console.error('Storage error:', e);
+        return null;
+      }
     }
 
+    // MongoDB API Functions
     async function fetchAllCases() {
+      // Check if server is available first
       if (!serverAvailable && !await checkServerConnection()) {
+        console.log('Using localStorage (offline mode)');
         cases = loadFromStorage('healthCases') || [];
-        updateDashboard(); renderCaseTable(); updateMapMarkers();
+        updateDashboard();
+        renderCaseTable();
+        updateMapMarkers();
         return cases;
       }
+      
       try {
-        // cache: 'no-store' forces fresh data every time, never uses a cached response
-        const response = await fetch(`${API_URL}/cases`, { cache: 'no-store' });
+        const response = await fetch(`${API_URL}/cases`);
         if (!response.ok) throw new Error('Failed to fetch cases');
         const data = await response.json();
-        cases = data.map(c => ({ ...c, _id: c._id, synced: true }));
-        saveToStorage('healthCases', cases); // keep localStorage in sync as offline backup
+        cases = data.map(c => ({
+          ...c,
+          _id: c._id,
+          synced: true
+        }));
         serverAvailable = true;
-        updateDashboard(); renderCaseTable(); updateMapMarkers();
+        updateDashboard();
+        renderCaseTable();
+        updateMapMarkers();
         return cases;
       } catch (error) {
+        console.error('Error fetching cases:', error);
         serverAvailable = false;
+        // Fallback to localStorage
         cases = loadFromStorage('healthCases') || [];
-        updateDashboard(); renderCaseTable(); updateMapMarkers();
+        updateDashboard();
+        renderCaseTable();
+        updateMapMarkers();
         return cases;
       }
     }
 
     async function createCase(caseData) {
       try {
-        const response = await fetch(`${API_URL}/cases`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(caseData) });
+        const response = await fetch(`${API_URL}/cases`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(caseData)
+        });
+        
         if (!response.ok) throw new Error('Failed to create case');
-        return await response.json();
+        
+        const savedCase = await response.json();
+        return savedCase;
       } catch (error) {
+        console.error('Error creating case:', error);
+        // Add to sync queue for later
         syncQueue.push(caseData);
         saveToStorage('syncQueue', syncQueue);
         throw error;
@@ -1734,28 +1899,60 @@
     }
 
     async function updateCase(caseId, caseData) {
-      const response = await fetch(`${API_URL}/cases/${caseId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(caseData) });
-      if (!response.ok) throw new Error('Failed to update case');
-      return await response.json();
+      try {
+        const response = await fetch(`${API_URL}/cases/${caseId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(caseData)
+        });
+        
+        if (!response.ok) throw new Error('Failed to update case');
+        
+        const updatedCase = await response.json();
+        return updatedCase;
+      } catch (error) {
+        console.error('Error updating case:', error);
+        throw error;
+      }
     }
 
     async function deleteCase(caseId) {
-      const response = await fetch(`${API_URL}/cases/${caseId}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete case');
-      return await response.json();
+      try {
+        const response = await fetch(`${API_URL}/cases/${caseId}`, {
+          method: 'DELETE'
+        });
+        
+        if (!response.ok) throw new Error('Failed to delete case');
+        
+        const result = await response.json();
+        return result;
+      } catch (error) {
+        console.error('Error deleting case:', error);
+        throw error;
+      }
     }
 
     async function syncQueuedCasesToMongoDB() {
       if (syncQueue.length === 0) return;
+      
       try {
-        const response = await fetch(`${API_URL}/cases/sync`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cases: syncQueue }) });
-        if (!response.ok) throw new Error('Failed to sync');
+        const response = await fetch(`${API_URL}/cases/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cases: syncQueue })
+        });
+        
+        if (!response.ok) throw new Error('Failed to sync cases');
+        
         const result = await response.json();
         syncQueue = [];
         saveToStorage('syncQueue', []);
         showNotification(`✓ ${result.cases.length} cases synced to database`, 'success');
+        
+        // Refresh cases from database
         await fetchAllCases();
       } catch (error) {
+        console.error('Error syncing queued cases:', error);
         showNotification('⚠ Sync failed, will retry later', 'warning');
       }
     }
@@ -1773,6 +1970,7 @@
       const active = cases.filter(c => c.status === 'Active').length + 8;
       const critical = cases.filter(c => c.severity === 'high').length + 6;
       const recovered = cases.filter(c => c.status === 'Recovered').length + 14;
+
       document.getElementById('totalCases').textContent = total;
       document.getElementById('activeCases').textContent = active;
       document.getElementById('criticalCases').textContent = critical;
@@ -1781,17 +1979,12 @@
 
     function renderCaseTable() {
       const tbody = document.getElementById('caseTableBody');
-      // Wipe ALL rows - DB is the single source of truth, no hardcoded defaults mixed in
-      tbody.innerHTML = '';
+      const existingRows = tbody.querySelectorAll('tr:not(.default-case)');
+      existingRows.forEach(row => row.remove());
+
       const severityMap = { high: 'severity-high', medium: 'severity-medium', low: 'severity-low' };
       const severityText = { high: 'Critical', medium: 'Medium', low: 'Low' };
       const isAdmin = currentUser && currentUser.role === 'admin';
-
-      if (cases.length === 0) {
-        const emptyRow = tbody.insertRow();
-        emptyRow.innerHTML = `<td colspan="8" style="text-align:center; color:#95a5a6; padding:32px; font-family:'Poppins',sans-serif;">No cases reported yet. Be the first to report a case.</td>`;
-        return;
-      }
 
       cases.forEach((caseData, index) => {
         const row = tbody.insertRow(0);
@@ -1802,37 +1995,66 @@
           <td><span class="severity-badge ${severityMap[caseData.severity]}">${severityText[caseData.severity]}</span></td>
           <td><span style="color: ${caseData.status === 'Active' ? '#e74c3c' : '#27ae60'}; font-weight: 700;">${caseData.status}</span></td>
           <td>${caseData.date}</td>
-          <td style="color: #7f8c8d; font-size: 12px;">${caseData.reportedBy || 'Unknown'}</td>
-          <td>${isAdmin ? `<button class="jarvis-btn" onclick="editCaseModal(${index})" style="margin-right: 8px; padding: 8px 16px; font-size: 10px;">✏️ Edit</button><button class="jarvis-btn jarvis-btn-danger" onclick="deleteCaseFunc(${index})">🗑️ Delete</button>` : ''}</td>`;
+          <td>${isAdmin ? `
+            <button class="jarvis-btn jarvis-btn-primary" onclick="editCaseModal(${index})" style="margin-right: 8px;">✏️ Edit</button>
+            <button class="jarvis-btn jarvis-btn-danger" onclick="deleteCase(${index})">🗑️ Delete</button>
+          ` : ''}</td>
+        `;
       });
     }
 
     async function deleteCaseFunc(index) {
-      if (!currentUser || currentUser.role !== 'admin') { showNotification('⚠️ Admin access required', 'error'); return; }
+      if (!currentUser || currentUser.role !== 'admin') {
+        showNotification('⚠️ Admin access required', 'error');
+        return;
+      }
+
       const caseToDelete = cases[index];
-      if (confirm(`⚠️ DELETE CASE?\n\nPatient: ${caseToDelete.name}\nAge: ${caseToDelete.age}\nLocation: ${caseToDelete.location}\n\nThis cannot be undone!`)) {
+      const confirmMessage = `⚠️ DELETE CASE CONFIRMATION\n\n` +
+        `This action CANNOT be undone!\n\n` +
+        `Patient: ${caseToDelete.name}\n` +
+        `Age: ${caseToDelete.age}\n` +
+        `Location: ${caseToDelete.location}\n` +
+        `Severity: ${caseToDelete.severity}\n` +
+        `Date: ${caseToDelete.date}\n\n` +
+        `Are you absolutely sure you want to DELETE this case?`;
+
+      if (confirm(confirmMessage)) {
         if (caseToDelete._id && isOnline) {
           try {
             await deleteCase(caseToDelete._id);
             cases.splice(index, 1);
-            showNotification(`✓ Case deleted: ${caseToDelete.name}`, 'success');
-          } catch (error) { showNotification('❌ Failed to delete from database', 'error'); return; }
+            showNotification(`✓ Case deleted from database: ${caseToDelete.name}`, 'success');
+          } catch (error) {
+            showNotification('❌ Failed to delete case from database', 'error');
+            return;
+          }
         } else {
           cases.splice(index, 1);
           saveToStorage('healthCases', cases);
           showNotification(`✓ Case deleted locally: ${caseToDelete.name}`, 'success');
         }
-        renderCaseTable(); updateDashboard(); updateMapMarkers();
+        
+        renderCaseTable();
+        updateDashboard();
+        updateMapMarkers();
       }
     }
-    window.deleteCaseFunc = deleteCaseFunc;
+    window.deleteCase = deleteCaseFunc;
 
+    // Edit Case Functions
     let currentEditIndex = null;
 
     function editCaseModal(index) {
-      if (!currentUser || currentUser.role !== 'admin') { showNotification('⚠️ Admin access required', 'error'); return; }
+      if (!currentUser || currentUser.role !== 'admin') {
+        showNotification('⚠️ Admin access required', 'error');
+        return;
+      }
+
       currentEditIndex = index;
       const caseData = cases[index];
+
+      // Populate form
       document.getElementById('editPatientName').value = caseData.name;
       document.getElementById('editPatientAge').value = caseData.age;
       document.getElementById('editPatientLocation').value = caseData.location;
@@ -1840,6 +2062,8 @@
       document.getElementById('editWaterSource').value = caseData.waterSource;
       document.getElementById('editSeverity').value = caseData.severity;
       document.getElementById('editStatus').value = caseData.status;
+
+      // Show modal
       document.getElementById('editCaseModal').classList.add('active');
     }
     window.editCaseModal = editCaseModal;
@@ -1850,55 +2074,66 @@
     }
     window.closeEditModal = closeEditModal;
 
+    // Edit case form submission
     document.getElementById('editCaseForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+
       if (currentEditIndex === null) return;
-      const updatedCase = { ...cases[currentEditIndex], name: document.getElementById('editPatientName').value, age: parseInt(document.getElementById('editPatientAge').value), location: document.getElementById('editPatientLocation').value, symptoms: document.getElementById('editPatientSymptoms').value, waterSource: document.getElementById('editWaterSource').value, severity: document.getElementById('editSeverity').value, status: document.getElementById('editStatus').value };
+
+      const updatedCase = {
+        ...cases[currentEditIndex],
+        name: document.getElementById('editPatientName').value,
+        age: parseInt(document.getElementById('editPatientAge').value),
+        location: document.getElementById('editPatientLocation').value,
+        symptoms: document.getElementById('editPatientSymptoms').value,
+        waterSource: document.getElementById('editWaterSource').value,
+        severity: document.getElementById('editSeverity').value,
+        status: document.getElementById('editStatus').value
+      };
+
+      // Try to update in MongoDB
       if (updatedCase._id && serverAvailable && isOnline) {
         try {
           await updateCase(updatedCase._id, updatedCase);
+          cases[currentEditIndex] = updatedCase;
           showNotification('✓ Case updated in database', 'success');
-          closeEditModal();
-          await fetchAllCases(); // re-fetch so all users see fresh state
-        }
-        catch (error) {
+        } catch (error) {
+          console.error('Error updating case:', error);
           cases[currentEditIndex] = updatedCase;
           saveToStorage('healthCases', cases);
-          updateDashboard(); renderCaseTable(); updateMapMarkers();
-          showNotification('⚠ Update saved locally', 'warning');
-          closeEditModal();
+          showNotification('⚠ Update saved locally, will sync later', 'warning');
         }
       } else {
         cases[currentEditIndex] = updatedCase;
         saveToStorage('healthCases', cases);
-        updateDashboard(); renderCaseTable(); updateMapMarkers();
         showNotification('⚠ Update saved locally', 'warning');
+      }
+
+      updateDashboard();
+      renderCaseTable();
+      updateMapMarkers();
+      closeEditModal();
+    });
+
+    // Close modal when clicking outside
+    document.getElementById('editCaseModal').addEventListener('click', (e) => {
+      if (e.target.id === 'editCaseModal') {
         closeEditModal();
       }
     });
-
-    document.getElementById('editCaseModal').addEventListener('click', (e) => { if (e.target.id === 'editCaseModal') closeEditModal(); });
-
-    // =============================================
-    // FIX 1: Show/hide report form based on role
-    // =============================================
-    function updateReportTabVisibility() {
-      const isObserver = !currentUser || currentUser.role === 'viewer';
-      document.getElementById('reportFormContainer').style.display = isObserver ? 'none' : 'block';
-      document.getElementById('reportBlockedMessage').style.display = isObserver ? 'block' : 'none';
-    }
 
     function loginUser() {
       document.getElementById('loginModal').classList.remove('active');
       document.getElementById('userBadge').style.display = 'flex';
       document.getElementById('userIcon').textContent = currentUser.icon;
       document.getElementById('userName').textContent = currentUser.name;
+      
       if (currentUser.role === 'admin') {
         document.getElementById('adminBtn').style.display = 'block';
         document.getElementById('actionsHeader').style.display = 'table-cell';
       }
+      
       saveToStorage('currentUser', currentUser);
-      updateReportTabVisibility(); // <-- ADDED
       renderCaseTable();
       showNotification(`✓ Welcome ${currentUser.name}`, 'success');
     }
@@ -1906,33 +2141,76 @@
     function initMap() {
       if (map) return;
       const mapContainer = document.getElementById('map');
+      
       if (!isOnline) {
-        mapContainer.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; border-radius: 8px;"><div style="text-align: center; color: #95a5a6;"><div style="font-size: 48px; margin-bottom: 16px;">⚠</div><div style="font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600;">Map Unavailable</div><div style="font-size: 12px; margin-top: 8px;">Internet connection required</div></div></div>`;
+        mapContainer.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; height: 100%; background: #f8f9fa; border-radius: 8px;">
+            <div style="text-align: center; color: #95a5a6;">
+              <div style="font-size: 48px; margin-bottom: 16px;">⚠</div>
+              <div style="font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600;">Map Unavailable</div>
+              <div style="font-size: 12px; margin-top: 8px;">Internet connection required</div>
+            </div>
+          </div>
+        `;
         return;
       }
+
       try {
         map = L.map('map').setView([25.5788, 91.8933], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Default locations
         const locations = [
           { lat: 24.8170, lng: 93.9368, name: 'Imphal', cases: 12, color: '#e74c3c' },
           { lat: 26.1445, lng: 91.7362, name: 'Guwahati', cases: 8, color: '#e74c3c' },
           { lat: 25.5788, lng: 91.8933, name: 'Shillong', cases: 3, color: '#3498db' }
         ];
+
         locations.forEach(loc => {
-          L.circle([loc.lat, loc.lng], { color: loc.color, fillColor: loc.color, fillOpacity: 0.3, radius: loc.cases * 5000 + 10000 }).addTo(map).bindPopup(`<strong>${loc.name}</strong><br>Cases: ${loc.cases}`);
+          L.circle([loc.lat, loc.lng], {
+            color: loc.color,
+            fillColor: loc.color,
+            fillOpacity: 0.3,
+            radius: loc.cases * 5000 + 10000
+          }).addTo(map).bindPopup(`<strong>${loc.name}</strong><br>Cases: ${loc.cases}`);
         });
+
+        // Add user-reported case markers
         updateMapMarkers();
-      } catch (e) { console.error('Map error:', e); }
+      } catch (e) {
+        console.error('Map error:', e);
+      }
     }
 
+    // Update map with user-reported cases
     function updateMapMarkers() {
       if (!map) return;
+      
+      // Clear existing user markers
       userMarkers.forEach(marker => map.removeLayer(marker));
       userMarkers = [];
+
+      // Add markers for cases with coordinates
       cases.forEach(c => {
         if (c.lat && c.lng) {
-          const marker = L.marker([c.lat, c.lng], { icon: L.divIcon({ className: 'custom-marker', html: `<div style="background: #e74c3c; border-radius: 50%; width: 20px; height: 20px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`, iconSize: [20, 20] }) }).addTo(map);
-          marker.bindPopup(`<strong>${c.name}</strong><br>Location: ${c.location}<br>Symptoms: ${c.symptoms}<br>Severity: ${c.severity}<br>Date: ${c.date}`);
+          const marker = L.marker([c.lat, c.lng], {
+            icon: L.divIcon({
+              className: 'custom-marker',
+              html: `<div style="background: #e74c3c; border-radius: 50%; width: 20px; height: 20px; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);"></div>`,
+              iconSize: [20, 20]
+            })
+          }).addTo(map);
+          
+          marker.bindPopup(`
+            <strong>${c.name}</strong><br>
+            Location: ${c.location}<br>
+            Symptoms: ${c.symptoms}<br>
+            Severity: ${c.severity}<br>
+            Date: ${c.date}
+          `);
+          
           userMarkers.push(marker);
         }
       });
@@ -1942,13 +2220,58 @@
       if (chart) return;
       const ctx = document.getElementById('trendChart');
       if (!ctx) return;
+      
       chart = new Chart(ctx, {
         type: 'line',
         data: {
           labels: ['Oct 13', 'Oct 14', 'Oct 15', 'Oct 16', 'Oct 17', 'Oct 18'],
-          datasets: [{ label: 'Actual Cases', data: [2, 3, 4, 3, 5, 7], borderColor: '#3498db', backgroundColor: 'rgba(52, 152, 219, 0.1)', tension: 0.4, fill: true, borderWidth: 3, pointRadius: 6, pointHoverRadius: 8, pointBackgroundColor: '#3498db', pointBorderColor: '#ffffff', pointBorderWidth: 2 }, { label: 'AI Prediction', data: [null, null, null, null, 5, 7, 9, 11], borderColor: '#f57c00', backgroundColor: 'rgba(245, 124, 0, 0.1)', tension: 0.4, fill: true, borderWidth: 3, borderDash: [10, 5], pointRadius: 6, pointHoverRadius: 8, pointBackgroundColor: '#f57c00', pointBorderColor: '#ffffff', pointBorderWidth: 2 }]
+          datasets: [{
+            label: 'Actual Cases',
+            data: [2, 3, 4, 3, 5, 7],
+            borderColor: '#3498db',
+            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+            tension: 0.4,
+            fill: true,
+            borderWidth: 3,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#3498db',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2
+          }, {
+            label: 'AI Prediction',
+            data: [null, null, null, null, 5, 7, 9, 11],
+            borderColor: '#f57c00',
+            backgroundColor: 'rgba(245, 124, 0, 0.1)',
+            tension: 0.4,
+            fill: true,
+            borderWidth: 3,
+            borderDash: [10, 5],
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#f57c00',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2
+          }]
         },
-        options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { labels: { font: { family: 'Inter', size: 13, weight: '600' } } } }, scales: { y: { beginAtZero: true } } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: {
+            mode: 'index',
+            intersect: false,
+          },
+          plugins: {
+            legend: { 
+              labels: { 
+                font: { family: 'Inter', size: 13, weight: '600' }
+              } 
+            }
+          },
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
       });
     }
 
@@ -1964,11 +2287,10 @@
           section.classList.add('section-hidden');
         }
       });
+
       if (tabName === 'water') setTimeout(() => initMap(), 100);
       if (tabName === 'analytics') setTimeout(() => initChart(), 100);
       if (tabName === 'protocols') updateProtocolsDisplay();
-      // FIX 2: Update report tab content whenever it's opened
-      if (tabName === 'report') updateReportTabVisibility();
     }
 
     // Character selection
@@ -1981,6 +2303,7 @@
         } else if (role === 'doctor') {
           document.getElementById('characterSelect').style.display = 'none';
           document.getElementById('doctorLoginForm').style.display = 'block';
+          loadDoctorsFromDB();
         } else if (role === 'viewer') {
           currentUser = { role: 'viewer', name: 'Observer', icon: '👁' };
           loginUser();
@@ -1988,10 +2311,13 @@
       });
     });
 
+    // Back buttons
     document.getElementById('backBtnDoctor').addEventListener('click', () => {
       document.getElementById('characterSelect').style.display = 'grid';
       document.getElementById('doctorLoginForm').style.display = 'none';
       document.getElementById('doctorError').style.display = 'none';
+      document.getElementById('registerError').style.display = 'none';
+      document.getElementById('registerSuccess').style.display = 'none';
     });
 
     document.getElementById('backBtnAdmin').addEventListener('click', () => {
@@ -2000,95 +2326,237 @@
       document.getElementById('adminError').style.display = 'none';
     });
 
-    // Populate doctor dropdown from DOCTORS list
-    function populateDoctorSelect() {
-      const select = document.getElementById('doctorSelect');
-      select.innerHTML = '<option value="">-- Select your name --</option>';
-      DOCTORS.forEach((doc, i) => {
-        const option = document.createElement('option');
-        option.value = i;
-        option.textContent = doc.name;
-        select.appendChild(option);
-      });
-    }
-    populateDoctorSelect();
-
-    document.getElementById('doctorLoginBtn').addEventListener('click', () => {
-      const selectedIndex = document.getElementById('doctorSelect').value;
-      const password = document.getElementById('doctorPassword').value;
-      if (selectedIndex === '') {
-        showNotification('❌ Please select your name', 'error');
-        return;
+    // =============================================
+    // TAB SWITCHER — Login / Register
+    // =============================================
+    function showDoctorTab(tab) {
+      if (tab === 'login') {
+        document.getElementById('doctorLoginTab').style.display = 'block';
+        document.getElementById('doctorRegisterTab').style.display = 'none';
+        document.getElementById('showLoginTab').style.background = '#3498db';
+        document.getElementById('showLoginTab').style.color = 'white';
+        document.getElementById('showRegisterTab').style.background = '#e9ecef';
+        document.getElementById('showRegisterTab').style.color = '#546e7a';
+        loadDoctorsFromDB();
+      } else {
+        document.getElementById('doctorLoginTab').style.display = 'none';
+        document.getElementById('doctorRegisterTab').style.display = 'block';
+        document.getElementById('showRegisterTab').style.background = '#27ae60';
+        document.getElementById('showRegisterTab').style.color = 'white';
+        document.getElementById('showLoginTab').style.background = '#e9ecef';
+        document.getElementById('showLoginTab').style.color = '#546e7a';
       }
-      const doctor = DOCTORS[parseInt(selectedIndex)];
-      if (password === doctor.password) {
-        currentUser = { role: 'doctor', name: doctor.name, icon: '⚕' };
+    }
+    window.showDoctorTab = showDoctorTab;
+
+    // Load doctor names from MongoDB into dropdown
+    async function loadDoctorsFromDB() {
+      try {
+        const res = await fetch(`${API_URL}/auth/doctors`, { cache: 'no-store' });
+        if (!res.ok) throw new Error('Failed');
+        const doctors = await res.json();
+        const select = document.getElementById('doctorSelect');
+        select.innerHTML = '<option value="">-- Select your name --</option>';
+        doctors.forEach(doc => {
+          const option = document.createElement('option');
+          option.value = doc.name;
+          option.textContent = doc.name;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        console.warn('Could not load doctors from DB — server may be waking up');
+      }
+    }
+
+    // =============================================
+    // DOCTOR LOGIN — calls /api/auth/login
+    // =============================================
+    document.getElementById('doctorLoginBtn').addEventListener('click', async () => {
+      const name = document.getElementById('doctorSelect').value;
+      const password = document.getElementById('doctorPassword').value;
+      const errorEl = document.getElementById('doctorError');
+      errorEl.style.display = 'none';
+
+      if (!name) { showNotification('❌ Please select your name', 'error'); return; }
+      if (!password) { showNotification('❌ Please enter your password', 'error'); return; }
+
+      try {
+        const res = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errorEl.textContent = '❌ ' + data.error;
+          errorEl.style.display = 'block';
+          return;
+        }
+        currentUser = { role: 'doctor', name: data.name, icon: '⚕' };
         document.getElementById('doctorPassword').value = '';
         loginUser();
-      } else {
-        document.getElementById('doctorError').style.display = 'block';
-        showNotification('❌ Wrong password', 'error');
+      } catch (err) {
+        errorEl.textContent = '❌ Could not reach server. Please try again.';
+        errorEl.style.display = 'block';
       }
     });
 
+    // =============================================
+    // DOCTOR REGISTER — calls /api/auth/register
+    // =============================================
+    document.getElementById('doctorRegisterBtn').addEventListener('click', async () => {
+      const name = document.getElementById('registerName').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      const confirm = document.getElementById('registerConfirm').value;
+      const errorEl = document.getElementById('registerError');
+      const successEl = document.getElementById('registerSuccess');
+      errorEl.style.display = 'none';
+      successEl.style.display = 'none';
+
+      if (!name) { errorEl.textContent = '❌ Please enter your name.'; errorEl.style.display = 'block'; return; }
+      if (password.length < 6) { errorEl.textContent = '❌ Password must be at least 6 characters.'; errorEl.style.display = 'block'; return; }
+      if (password !== confirm) { errorEl.textContent = '❌ Passwords do not match.'; errorEl.style.display = 'block'; return; }
+
+      try {
+        const res = await fetch(`${API_URL}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, password })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          errorEl.textContent = '❌ ' + data.error;
+          errorEl.style.display = 'block';
+          return;
+        }
+        successEl.textContent = `✓ Account created for ${data.name}! Switch to Login tab to sign in.`;
+        successEl.style.display = 'block';
+        document.getElementById('registerName').value = '';
+        document.getElementById('registerPassword').value = '';
+        document.getElementById('registerConfirm').value = '';
+        showNotification(`✓ Account created for ${data.name}!`, 'success');
+      } catch (err) {
+        errorEl.textContent = '❌ Could not reach server. Please try again.';
+        errorEl.style.display = 'block';
+      }
+    });
+
+    // =============================================
+    // ADMIN LOGIN — kept local (only you know this)
+    // =============================================
     document.getElementById('adminLoginBtn').addEventListener('click', () => {
       const username = document.getElementById('adminUsername').value;
       const password = document.getElementById('adminPassword').value;
-      if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      if (username === 'admin' && password === 'admin@AISH2026') {
         currentUser = { role: 'admin', name: 'Administrator', icon: '⚙' };
         loginUser();
-      } else { document.getElementById('adminError').style.display = 'block'; showNotification('❌ Access denied', 'error'); }
+      } else {
+        document.getElementById('adminError').style.display = 'block';
+        showNotification('❌ Access denied', 'error');
+      }
     });
 
+    // Location Detection
     function detectLocation() {
       const btn = document.getElementById('detectLocationBtn');
       const info = document.getElementById('locationInfo');
-      if (!navigator.geolocation) { showNotification('❌ Geolocation not supported', 'error'); return; }
+      
+      if (!navigator.geolocation) {
+        showNotification('❌ Geolocation not supported', 'error');
+        return;
+      }
+
       btn.disabled = true;
       btn.textContent = '🔄 Detecting...';
       info.classList.remove('show');
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        const lat = position.coords.latitude;
-        const lng = position.coords.longitude;
-        document.getElementById('patientLat').value = lat;
-        document.getElementById('patientLng').value = lng;
-        try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`);
-          const data = await response.json();
-          const locationName = data.address.city || data.address.town || data.address.village || data.address.county || 'Unknown Location';
-          document.getElementById('patientLocation').value = locationName;
-          info.innerHTML = `<strong>✓ Location Detected</strong><br>📍 ${locationName}<br>🌐 Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-          info.classList.add('show');
-          showNotification('✓ Location detected successfully', 'success');
-        } catch (error) {
-          document.getElementById('patientLocation').value = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
-          info.innerHTML = `<strong>✓ GPS Detected</strong><br>🌐 ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-          info.classList.add('show');
-          showNotification('✓ GPS coordinates captured', 'success');
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          
+          // Store coordinates
+          document.getElementById('patientLat').value = lat;
+          document.getElementById('patientLng').value = lng;
+
+          // Reverse geocode to get location name
+          try {
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`
+            );
+            const data = await response.json();
+            
+            const locationName = data.address.city || data.address.town || 
+                                data.address.village || data.address.county || 
+                                'Unknown Location';
+            
+            document.getElementById('patientLocation').value = locationName;
+            
+            info.innerHTML = `
+              <strong>✓ Location Detected</strong><br>
+              📍 ${locationName}<br>
+              🌐 Coordinates: ${lat.toFixed(4)}, ${lng.toFixed(4)}
+            `;
+            info.classList.add('show');
+            
+            showNotification('✓ Location detected successfully', 'success');
+          } catch (error) {
+            console.error('Geocoding error:', error);
+            document.getElementById('patientLocation').value = `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+            info.innerHTML = `
+              <strong>✓ GPS Detected</strong><br>
+              🌐 ${lat.toFixed(4)}, ${lng.toFixed(4)}
+            `;
+            info.classList.add('show');
+            showNotification('✓ GPS coordinates captured', 'success');
+          }
+          
+          btn.disabled = false;
+          btn.textContent = '📍 Detect My Location';
+        },
+        (error) => {
+          btn.disabled = false;
+          btn.textContent = '📍 Detect My Location';
+          
+          let message = 'Location detection failed';
+          if (error.code === 1) message = '❌ Location access denied';
+          else if (error.code === 2) message = '❌ Location unavailable';
+          else if (error.code === 3) message = '❌ Location timeout';
+          
+          showNotification(message, 'error');
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         }
-        btn.disabled = false;
-        btn.textContent = '📍 Detect My Location';
-      }, (error) => {
-        btn.disabled = false;
-        btn.textContent = '📍 Detect My Location';
-        let message = 'Location detection failed';
-        if (error.code === 1) message = '❌ Location access denied';
-        else if (error.code === 2) message = '❌ Location unavailable';
-        else if (error.code === 3) message = '❌ Location timeout';
-        showNotification(message, 'error');
-      }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+      );
     }
 
+    // Geocode entered location
     async function geocodeLocation(locationName) {
       if (!locationName) return null;
+      
       try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationName)},India&limit=1`);
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locationName)},India&limit=1`
+        );
         const data = await response.json();
-        if (data && data.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon), displayName: data[0].display_name };
-      } catch (error) { console.error('Geocoding error:', error); }
+        
+        if (data && data.length > 0) {
+          return {
+            lat: parseFloat(data[0].lat),
+            lng: parseFloat(data[0].lon),
+            displayName: data[0].display_name
+          };
+        }
+      } catch (error) {
+        console.error('Geocoding error:', error);
+      }
       return null;
     }
 
+    // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
       document.getElementById('loginModal').classList.add('active');
       document.getElementById('userBadge').style.display = 'none';
@@ -2103,41 +2571,49 @@
       showNotification('✓ Session terminated', 'success');
     });
 
-    document.getElementById('switchRoleBtn').addEventListener('click', () => { document.getElementById('logoutBtn').click(); });
-
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => { switchTab(btn.getAttribute('data-tab')); });
+    // Switch role
+    document.getElementById('switchRoleBtn').addEventListener('click', () => {
+      document.getElementById('logoutBtn').click();
     });
 
+    // Navigation
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchTab(btn.getAttribute('data-tab'));
+      });
+    });
+
+    // Symptom selection
     document.querySelectorAll('.symptom-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         btn.classList.toggle('selected');
-        const selected = Array.from(document.querySelectorAll('.symptom-btn.selected')).map(b => b.getAttribute('data-symptom'));
+        const selected = Array.from(document.querySelectorAll('.symptom-btn.selected'))
+          .map(b => b.getAttribute('data-symptom'));
         document.getElementById('selectedSymptoms').value = selected.join(', ');
       });
     });
 
-    // =============================================
-    // FIX 3: Block observers from submitting cases
-    // =============================================
+    // Report form
     document.getElementById('reportForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-
-      // BLOCK observers from submitting
-      if (!currentUser || currentUser.role === 'viewer') {
-        showNotification('❌ Observers cannot report cases', 'error');
+      const symptoms = document.getElementById('selectedSymptoms').value;
+      
+      if (!symptoms) {
+        showNotification('❌ Please select at least one symptom', 'error');
         return;
       }
-
-      const symptoms = document.getElementById('selectedSymptoms').value;
-      if (!symptoms) { showNotification('❌ Please select at least one symptom', 'error'); return; }
 
       const locationName = document.getElementById('patientLocation').value;
       let lat = document.getElementById('patientLat').value;
       let lng = document.getElementById('patientLng').value;
+
+      // If coordinates not available, try to geocode the location
       if (!lat || !lng) {
         const geoData = await geocodeLocation(locationName);
-        if (geoData) { lat = geoData.lat; lng = geoData.lng; }
+        if (geoData) {
+          lat = geoData.lat;
+          lng = geoData.lng;
+        }
       }
 
       const newCase = {
@@ -2153,44 +2629,50 @@
         status: 'Active',
         timestamp: new Date().toISOString(),
         synced: isOnline,
-        reportedBy: currentUser ? currentUser.name : 'Unknown',
-        userId: currentUser ? currentUser.role : null
+        userId: currentUser ? currentUser.email : null
       };
 
+      // Try to save to MongoDB
       if (isOnline) {
         try {
-          await createCase(newCase);
-          // Re-fetch fresh data from DB so all users see the same state
-          await fetchAllCases();
-          showNotification('✓ Case reported and saved to database', 'success');
+          const savedCase = await createCase(newCase);
+          cases.push(savedCase);
+          showNotification('✓ Case reported and synced to database', 'success');
         } catch (error) {
+          // Fallback to local storage
           cases.push(newCase);
           syncQueue.push(newCase);
           saveToStorage('syncQueue', syncQueue);
           saveToStorage('healthCases', cases);
-          updateDashboard(); renderCaseTable(); updateMapMarkers();
-          showNotification('⚠ Case saved locally (will sync when server available)', 'warning');
+          showNotification('⚠ Case saved locally (will sync when server is available)', 'warning');
         }
       } else {
         cases.push(newCase);
         syncQueue.push(newCase);
         saveToStorage('syncQueue', syncQueue);
         saveToStorage('healthCases', cases);
-        updateDashboard(); renderCaseTable(); updateMapMarkers();
         showNotification('⚠ Case saved locally (will sync when online)', 'warning');
       }
       
-      updateDashboard(); renderCaseTable(); updateMapMarkers();
+      updateDashboard();
+      renderCaseTable();
+      updateMapMarkers(); // Update map with new case
+      
       document.getElementById('reportForm').reset();
       document.querySelectorAll('.symptom-btn').forEach(b => b.classList.remove('selected'));
       document.getElementById('locationInfo').classList.remove('show');
       document.getElementById('patientLat').value = '';
       document.getElementById('patientLng').value = '';
+      
       switchTab('dashboard');
     });
 
-    // All rows now come from DB only - no hardcoded defaults
+    // Mark default rows
+    document.querySelectorAll('#caseTableBody tr').forEach(row => {
+      row.classList.add('default-case');
+    });
 
+    // Load saved data
     const savedUser = loadFromStorage('currentUser');
     if (savedUser) {
       currentUser = savedUser;
@@ -2202,113 +2684,808 @@
         document.getElementById('adminBtn').style.display = 'block';
         document.getElementById('actionsHeader').style.display = 'table-cell';
       }
-      updateReportTabVisibility();
     }
 
+    // Check server connection and load cases
     (async function initializeApp() {
+      console.log('🔄 Initializing AISH Health System...');
+      
+      // Try to connect to server
       const connected = await checkServerConnection();
+      
       if (connected && isOnline) {
-        try { await fetchAllCases(); showNotification('✓ Connected to database', 'success'); }
-        catch (error) { cases = loadFromStorage('healthCases') || []; updateDashboard(); renderCaseTable(); updateMapMarkers(); }
+        console.log('✓ Loading data from MongoDB...');
+        try {
+          await fetchAllCases();
+          showNotification('✓ Connected to database', 'success');
+        } catch (error) {
+          console.warn('Failed to fetch from MongoDB, using local data');
+          cases = loadFromStorage('healthCases') || [];
+          updateDashboard();
+          renderCaseTable();
+          updateMapMarkers();
+        }
       } else {
+        console.log('📱 Backend not available, using offline mode');
         cases = loadFromStorage('healthCases') || [];
-        updateDashboard(); renderCaseTable(); updateMapMarkers();
+        updateDashboard();
+        renderCaseTable();
+        updateMapMarkers();
+        
+        // Show helpful message in console only
+        const backendMsg = `
+          ⚠️ Backend Server Not Connected
+          
+          The system is working in offline mode.
+          
+          To enable cross-device sync:
+          1. Make sure MongoDB is running
+          2. Start the backend server: npm start
+          3. Refresh this page
+          
+          You can still use all features locally!
+        `;
+        console.info(backendMsg);
       }
     })();
 
+    // Load preferred language
     const savedLang = loadFromStorage('preferredLanguage');
-    if (savedLang && translations[savedLang]) currentLanguage = savedLang;
+    if (savedLang && translations[savedLang]) {
+      currentLanguage = savedLang;
+    }
     updateProtocolsDisplay();
 
+    // Online/Offline Status Management
     function updateOnlineStatus() {
       isOnline = navigator.onLine;
       const statusEl = document.getElementById('systemStatus');
       const statusDot = document.getElementById('statusDot');
       const statusText = document.getElementById('statusText');
+      
       if (isOnline) {
-        statusEl.classList.remove('offline'); statusDot.classList.remove('offline'); statusText.classList.remove('offline');
-        statusText.textContent = 'System Online'; syncQueuedData();
+        statusEl.classList.remove('offline');
+        statusDot.classList.remove('offline');
+        statusText.classList.remove('offline');
+        statusText.textContent = 'System Online';
+        syncQueuedData();
       } else {
-        statusEl.classList.add('offline'); statusDot.classList.add('offline'); statusText.classList.add('offline');
+        statusEl.classList.add('offline');
+        statusDot.classList.add('offline');
+        statusText.classList.add('offline');
         statusText.textContent = 'Offline Mode';
       }
     }
 
+    // Sync queued data when coming online
     async function syncQueuedData() {
       const queue = loadFromStorage('syncQueue') || [];
       if (queue.length > 0) {
-        showNotification(`🔄 Syncing ${queue.length} pending cases...`, 'info');
-        try { await syncQueuedCasesToMongoDB(); } catch (error) { showNotification('⚠ Sync failed, will retry later', 'warning'); }
+        showNotification(`🔄 Syncing ${queue.length} pending cases to database...`, 'info');
+        
+        try {
+          await syncQueuedCasesToMongoDB();
+        } catch (error) {
+          showNotification('⚠ Sync failed, will retry later', 'warning');
+        }
       }
     }
 
-    window.addEventListener('online', () => { updateOnlineStatus(); showNotification('✓ Connection restored', 'success'); });
-    window.addEventListener('offline', () => { updateOnlineStatus(); });
+    // Monitor online/offline status
+    window.addEventListener('online', () => {
+      updateOnlineStatus();
+      showNotification('✓ Connection restored', 'success');
+    });
+
+    window.addEventListener('offline', () => {
+      updateOnlineStatus();
+    });
+
+    // Initial status check
     updateOnlineStatus();
 
+    // Download Dashboard Report
     function downloadDashboard() {
-      const stats = { totalCases: cases.length, activeCases: cases.filter(c => c.status === 'Active').length, recoveredCases: cases.filter(c => c.status === 'Recovered').length, criticalCases: cases.filter(c => c.severity === 'high').length };
-      let content = `AISH HEALTH MONITORING SYSTEM\nGenerated: ${new Date().toLocaleString()}\n${'-'.repeat(60)}\n\nOVERALL STATISTICS\nTotal Cases: ${stats.totalCases}\nActive: ${stats.activeCases}\nRecovered: ${stats.recoveredCases}\nCritical: ${stats.criticalCases}\n\n${'-'.repeat(60)}\nRECENT CASES\n${'-'.repeat(60)}\n`;
+      const stats = {
+        totalCases: cases.length,
+        activeCases: cases.filter(c => c.status === 'Active').length,
+        recoveredCases: cases.filter(c => c.status === 'Recovered').length,
+        criticalCases: cases.filter(c => c.severity === 'High').length
+      };
+
+      let content = `AISH HEALTH MONITORING SYSTEM
+AI-Powered Disease Surveillance Dashboard
+Generated: ${new Date().toLocaleString()}
+${'-'.repeat(60)}
+
+OVERALL STATISTICS
+${'-'.repeat(60)}
+Total Cases Reported: ${stats.totalCases}
+Active Cases: ${stats.activeCases}
+Recovered Cases: ${stats.recoveredCases}
+Critical Cases: ${stats.criticalCases}
+
+${'-'.repeat(60)}
+RECENT CASES SUMMARY
+${'-'.repeat(60)}
+`;
+
       cases.slice(-10).reverse().forEach((c, i) => {
-        content += `\n${i + 1}. ${c.name} (Age: ${c.age})\n   Location: ${c.location}\n   Symptoms: ${c.symptoms}\n   Severity: ${c.severity}\n   Status: ${c.status}\n   Date: ${c.date}\n${'-'.repeat(60)}`;
+        content += `
+${i + 1}. ${c.name} (Age: ${c.age})
+   Location: ${c.location}${c.lat && c.lng ? ` (${c.lat.toFixed(4)}, ${c.lng.toFixed(4)})` : ''}
+   Symptoms: ${c.symptoms}
+   Severity: ${c.severity}
+   Status: ${c.status}
+   Date: ${c.date}
+   Water Source: ${c.waterSource}
+   Synced: ${c.synced ? 'Yes' : 'Pending'}
+${'-'.repeat(60)}`;
       });
+
+      content += `
+
+DISEASE DISTRIBUTION
+${'-'.repeat(60)}
+`;
+
+      const diseaseCount = {};
+      cases.forEach(c => {
+        const symptoms = c.symptoms.toLowerCase();
+        if (symptoms.includes('diarrhea') || symptoms.includes('vomiting')) {
+          diseaseCount['Cholera/Gastroenteritis'] = (diseaseCount['Cholera/Gastroenteritis'] || 0) + 1;
+        }
+        if (symptoms.includes('fever')) {
+          diseaseCount['Typhoid/Fever'] = (diseaseCount['Typhoid/Fever'] || 0) + 1;
+        }
+        if (symptoms.includes('abdominal')) {
+          diseaseCount['Dysentery'] = (diseaseCount['Dysentery'] || 0) + 1;
+        }
+      });
+
+      Object.entries(diseaseCount).forEach(([disease, count]) => {
+        content += `${disease}: ${count} cases\n`;
+      });
+
+      content += `
+${'-'.repeat(60)}
+SYSTEM INFORMATION
+${'-'.repeat(60)}
+Report Generated By: AISH System
+AI Model: Active
+Connection Status: ${isOnline ? 'Online' : 'Offline'}
+Data Source: Real-time monitoring
+Contact: emergency@aish-health.org
+${'-'.repeat(60)}
+
+This report is confidential and intended for authorized personnel only.
+`;
+
       downloadFile(content, `AISH_Dashboard_Report_${new Date().toISOString().split('T')[0]}.txt`, 'text/plain');
       showNotification('✓ Dashboard report downloaded', 'success');
     }
 
+    // Download Case Registry as CSV
     function downloadRegistry() {
       let csv = 'Patient Name,Age,Location,Latitude,Longitude,Symptoms,Water Source,Severity,Date,Status,Synced,Timestamp\n';
-      cases.forEach(c => { csv += `"${c.name}","${c.age}","${c.location}","${c.lat || ''}","${c.lng || ''}","${c.symptoms}","${c.waterSource}","${c.severity}","${c.date}","${c.status}","${c.synced ? 'Yes' : 'Pending'}","${c.timestamp || ''}"\n`; });
+      
+      cases.forEach(c => {
+        csv += `"${c.name}","${c.age}","${c.location}","${c.lat || ''}","${c.lng || ''}","${c.symptoms}","${c.waterSource}","${c.severity}","${c.date}","${c.status}","${c.synced ? 'Yes' : 'Pending'}","${c.timestamp || ''}"\n`;
+      });
+
       downloadFile(csv, `AISH_Case_Registry_${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
       showNotification('✓ Case registry downloaded', 'success');
     }
 
+    // Helper function to trigger file download
     function downloadFile(content, filename, mimeType) {
       const blob = new Blob([content], { type: mimeType });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url; a.download = filename;
-      document.body.appendChild(a); a.click();
-      window.URL.revokeObjectURL(url); document.body.removeChild(a);
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     }
 
-    // ========== CHATBOT ==========
+    // ========================================
+    // AISH CHATBOT - MULTILINGUAL RULE-BASED AI
+    // ========================================
+    
     let chatLanguage = 'en';
+    
     const chatKnowledgeBase = {
       en: {
-        cholera: { keywords: ['cholera', 'vibrio', 'rice water', 'severe diarrhea'], response: `**Cholera - Key Information:**\n\n📋 Cholera is an acute diarrheal infection caused by Vibrio cholerae bacteria.\n\n🔬 Symptoms: Severe watery diarrhea, vomiting, rapid dehydration, muscle cramps\n\n💊 Treatment: ORS immediately, IV fluids for severe cases, antibiotics as prescribed\n\n🛡️ Prevention: Drink only boiled water, wash hands frequently, cook food thoroughly\n\n⚕️ Seek immediate medical help if symptoms appear!` },
-        typhoid: { keywords: ['typhoid', 'enteric fever', 'salmonella', 'prolonged fever'], response: `**Typhoid Fever - Essential Guide:**\n\n📋 Typhoid is a bacterial infection caused by Salmonella typhi.\n\n🌡️ Symptoms: Prolonged high fever, headache, stomach pain, loss of appetite\n\n💊 Treatment: Antibiotics (Ciprofloxacin/Ceftriaxone), rest, adequate nutrition\n\n🛡️ Prevention: Typhoid vaccination, safe drinking water, good hygiene\n\n📞 If fever exceeds 104°F, seek immediate medical attention!` },
-        prevention: { keywords: ['prevent', 'prevention', 'avoid', 'protect', 'safety'], response: `**Waterborne Disease Prevention Guide:**\n\n💧 Safe Water: Boil for 1 minute, use purification tablets, store in clean covered containers\n\n🧼 Hygiene: Wash hands with soap before eating, after toilet use\n\n🍲 Food Safety: Cook food thoroughly, wash fruits and vegetables\n\n🏥 Health: Get vaccinated (Cholera, Typhoid), regular health check-ups\n\n✅ Prevention is always better than cure!` },
-        symptoms: { keywords: ['symptom', 'signs', 'feeling', 'sick', 'ill'], response: `**Common Waterborne Disease Symptoms:**\n\nImmediate (0-24 hrs): Nausea, stomach cramps, watery diarrhea, mild fever\n\nModerate (1-3 days): Persistent diarrhea, fever 100-102°F, headache, fatigue\n\n🚨 Severe (go to hospital): Bloody diarrhea, high fever over 103°F, severe dehydration, confusion\n\n💧 Dehydration signs: Extreme thirst, dark urine, dizziness, dry mouth\n\nWhen in doubt, always consult a healthcare provider!` },
-        emergency: { keywords: ['emergency', 'urgent', 'help', 'serious', 'critical', 'ambulance'], response: `**🚨 EMERGENCY CONTACTS:**\n\n📞 Ambulance: 108 / 102\n📞 National Health Helpline: 104 / 1075\n📞 Emergency Services: 112\n\n🚨 Call emergency if: unconscious, severe dehydration, fever above 104°F, uncontrolled vomiting\n\n⚕️ Early medical intervention saves lives!` },
-        water: { keywords: ['water', 'purification', 'clean', 'safe', 'boil'], response: `**Water Purification & Safety Guide:**\n\n💧 Boiling: Most effective — boil 1 minute, kills all bacteria and viruses\n\n💊 Chemical: Chlorine tablets or iodine drops — wait 30 minutes before drinking\n\n🔧 Filtration: Ceramic or activated carbon filters, UV purifiers\n\n☀️ Solar SODIS: Clear bottles in direct sunlight for 6 hours\n\n💡 When in doubt about water safety, always boil it!` }
+        cholera: {
+          keywords: ['cholera', 'vibrio', 'rice water', 'severe diarrhea'],
+          response: `**Cholera - Key Information:**
+
+📋 **What is Cholera?**
+Cholera is an acute diarrheal infection caused by Vibrio cholerae bacteria, transmitted through contaminated water and food.
+
+🔬 **Symptoms:**
+• Severe watery diarrhea ("rice-water stools")
+• Vomiting
+• Rapid dehydration
+• Muscle cramps
+• Low blood pressure
+
+⚠️ **Risk Factors:**
+• Contaminated water sources
+• Poor sanitation
+• Crowded living conditions
+• Raw/undercooked seafood
+
+💊 **Treatment:**
+• Immediate oral rehydration solution (ORS)
+• Intravenous fluids for severe cases
+• Antibiotics (as prescribed)
+• Zinc supplements
+
+🛡️ **Prevention:**
+• Drink only safe, treated water
+• Wash hands frequently
+• Cook food thoroughly
+• Use proper sanitation facilities
+
+⚕️ **Seek immediate medical help if symptoms appear!**`
+        },
+        typhoid: {
+          keywords: ['typhoid', 'enteric fever', 'salmonella', 'prolonged fever'],
+          response: `**Typhoid Fever - Essential Guide:**
+
+📋 **What is Typhoid?**
+Typhoid is a bacterial infection caused by Salmonella typhi, spread through contaminated food and water.
+
+🌡️ **Symptoms:**
+• Prolonged high fever (103-104°F)
+• Headache and weakness
+• Stomach pain
+• Loss of appetite
+• Rose-colored spots on chest
+• Constipation or diarrhea
+
+⏱️ **Timeline:**
+Symptoms appear 6-30 days after exposure, typically lasting 3-4 weeks without treatment.
+
+💊 **Treatment:**
+• Antibiotics (Ciprofloxacin, Ceftriaxone)
+• Complete the full antibiotic course
+• Rest and adequate nutrition
+• Fever management
+• Hospital care for severe cases
+
+🛡️ **Prevention:**
+• Typhoid vaccination
+• Safe drinking water
+• Good hygiene practices
+• Avoid raw foods
+• Wash fruits and vegetables
+
+📞 **Emergency:** If fever exceeds 104°F or symptoms worsen, seek immediate medical attention!`
+        },
+        dysentery: {
+          keywords: ['dysentery', 'bloody diarrhea', 'shigella', 'intestinal infection'],
+          response: `**Dysentery - Complete Information:**
+
+📋 **What is Dysentery?**
+Dysentery is intestinal inflammation causing severe diarrhea with blood and mucus, caused by bacteria (Shigella) or parasites (Entamoeba).
+
+💉 **Symptoms:**
+• Bloody or mucus-containing diarrhea
+• Severe abdominal cramps
+• Fever and chills
+• Nausea and vomiting
+• Dehydration
+• Painful bowel movements
+
+🦠 **Types:**
+1. **Bacterial (Shigellosis):** More common, acute onset
+2. **Amoebic:** Caused by parasites, may be chronic
+
+💊 **Treatment:**
+• Oral rehydration therapy (ORS)
+• Antibiotics for bacterial dysentery
+• Antiparasitic medications for amoebic
+• Avoid anti-diarrheal medications
+• Maintain fluid intake
+
+🛡️ **Prevention:**
+• Hand washing with soap
+• Safe food and water
+• Proper sanitation
+• Avoid contaminated sources
+• Personal hygiene
+
+⚕️ **Seek medical care immediately if you see blood in stools!**`
+        },
+        prevention: {
+          keywords: ['prevent', 'prevention', 'avoid', 'protect', 'safety'],
+          response: `**Waterborne Disease Prevention Guide:**
+
+💧 **Safe Water Practices:**
+• Boil water for at least 1 minute
+• Use water purification tablets
+• Install proper water filters
+• Store water in clean, covered containers
+• Avoid stagnant water sources
+
+🧼 **Hygiene Essentials:**
+• Wash hands with soap before eating
+• Wash hands after using toilet
+• Keep nails clean and trimmed
+• Use hand sanitizer when soap unavailable
+• Avoid touching face with unwashed hands
+
+🍲 **Food Safety:**
+• Cook food thoroughly (especially meat and fish)
+• Wash fruits and vegetables
+• Avoid street food in high-risk areas
+• Use clean utensils
+• Refrigerate perishable food
+
+🏥 **Health Measures:**
+• Get vaccinated (Cholera, Typhoid)
+• Take prophylactic medications when traveling
+• Build immunity with proper nutrition
+• Regular health check-ups
+
+🚽 **Sanitation:**
+• Use proper toilets
+• Maintain clean surroundings
+• Dispose waste properly
+• Keep water sources protected
+• Report contamination immediately
+
+✅ **Remember:** Prevention is always better than cure!`
+        },
+        symptoms: {
+          keywords: ['symptom', 'signs', 'feeling', 'sick', 'ill'],
+          response: `**Common Waterborne Disease Symptoms:**
+
+🚨 **Warning Signs to Watch For:**
+
+**Immediate Symptoms (0-24 hours):**
+• Nausea and vomiting
+• Stomach cramps
+• Watery diarrhea
+• Mild fever
+
+**Moderate Symptoms (1-3 days):**
+• Persistent diarrhea
+• Fever (100-102°F)
+• Headache
+• Muscle aches
+• Loss of appetite
+• Fatigue
+
+**Severe Symptoms (Seek Emergency Care):**
+• 🚨 Bloody diarrhea
+• 🚨 High fever (>103°F)
+• 🚨 Severe dehydration (dry mouth, no urination)
+• 🚨 Rapid heartbeat
+• 🚨 Confusion or dizziness
+• 🚨 Inability to keep liquids down
+
+💧 **Dehydration Signs:**
+• Extreme thirst
+• Dry skin and mouth
+• Dark urine
+• Sunken eyes
+• Reduced urination
+• Dizziness
+
+⚕️ **Action Steps:**
+1. Start ORS immediately
+2. Rest and avoid solid food initially
+3. Monitor temperature
+4. Seek medical help if symptoms worsen
+5. Report case to local health authorities
+
+**When in doubt, always consult a healthcare provider!**`
+        },
+        treatment: {
+          keywords: ['treatment', 'cure', 'medicine', 'therapy', 'treat'],
+          response: `**Waterborne Disease Treatment Protocol:**
+
+💊 **First-Line Treatment:**
+
+**1. Rehydration (MOST IMPORTANT):**
+• Oral Rehydration Solution (ORS)
+• Recipe: 1 liter water + 6 teaspoons sugar + 1/2 teaspoon salt
+• Drink small amounts frequently
+• Continue even if vomiting
+• IV fluids for severe dehydration
+
+**2. Medications:**
+• Antibiotics (only as prescribed by doctor)
+  - Ciprofloxacin for typhoid
+  - Azithromycin for cholera
+  - Metronidazole for dysentery
+• Zinc supplements (for children)
+• Probiotics (to restore gut health)
+• Fever reducers (Paracetamol/Acetaminophen)
+
+**3. Dietary Management:**
+• BRAT diet (Bananas, Rice, Applesauce, Toast)
+• Clear fluids
+• Avoid dairy products initially
+• Gradually return to normal diet
+• Small, frequent meals
+
+**4. Rest and Recovery:**
+• Complete bed rest
+• Avoid physical exertion
+• Stay home to prevent spread
+• Maintain personal hygiene
+
+⚠️ **DO NOT:**
+• Self-medicate with antibiotics
+• Use anti-diarrheal medications without doctor's advice
+• Stop antibiotics mid-course
+• Share medications
+• Ignore worsening symptoms
+
+📞 **Emergency Contacts:**
+• National Health Helpline: 104
+• Ambulance: 108
+• Emergency: 112
+
+**Always complete the full course of treatment as prescribed!**`
+        },
+        emergency: {
+          keywords: ['emergency', 'urgent', 'help', 'serious', 'critical', 'ambulance'],
+          response: `**🚨 EMERGENCY CONTACTS & PROTOCOLS:**
+
+**Immediate Emergency Numbers:**
+📞 **Ambulance:** 108 / 102
+📞 **National Health Helpline:** 104 / 1075
+📞 **Emergency Services:** 112
+📞 **Poison Control:** 1066
+
+**When to Call Emergency Services:**
+🚨 **Life-Threatening Signs:**
+• Unconsciousness or confusion
+• Severe breathing difficulty
+• Chest pain
+• Uncontrollable bleeding
+• Seizures
+• Extreme dehydration (no urination for 12+ hours)
+• Fever above 104°F (40°C)
+
+**Before Emergency Arrives:**
+1. ✅ Keep patient comfortable
+2. ✅ Monitor vital signs
+3. ✅ Continue ORS if conscious
+4. ✅ Note symptoms and timeline
+5. ✅ Have medical history ready
+6. ✅ Clear path for emergency responders
+
+**Nearest Facilities:**
+• Check AISH system dashboard for outbreak locations
+• Contact nearest primary health center
+• Government hospitals provide free treatment
+• Keep list of nearby pharmacies
+
+**Disease-Specific Emergencies:**
+• **Cholera:** Severe dehydration within hours
+• **Typhoid:** Intestinal bleeding/perforation
+• **Dysentery:** Severe bloody diarrhea
+
+⚕️ **Remember:** Early medical intervention saves lives!
+
+**For non-emergencies, consult local health workers or use telemedicine services.**`
+        },
+        water: {
+          keywords: ['water', 'purification', 'clean', 'safe', 'treatment', 'boil'],
+          response: `**Water Purification & Safety Guide:**
+
+💧 **Water Treatment Methods:**
+
+**1. Boiling (Most Effective):**
+• Boil for 1 minute at sea level
+• Boil for 3 minutes at high altitude
+• Let cool before drinking
+• ✅ Kills all bacteria, viruses, parasites
+
+**2. Chemical Treatment:**
+• Chlorine tablets (follow instructions)
+• Iodine drops (2 drops per liter)
+• Wait 30 minutes before drinking
+• ✅ Effective against most pathogens
+
+**3. Filtration:**
+• Ceramic filters (0.2-0.5 micron)
+• Activated carbon filters
+• UV water purifiers
+• Reverse osmosis systems
+• ✅ Removes physical contaminants
+
+**4. Solar Disinfection (SODIS):**
+• Fill clear bottles with water
+• Place in direct sunlight for 6 hours
+• ✅ Free and effective for small quantities
+
+**Safe Water Storage:**
+• Use clean, covered containers
+• Don't touch water with hands
+• Use a long-handled ladle
+• Clean containers weekly
+• Store in cool, dark place
+
+**Water Source Safety:**
+• Avoid stagnant water
+• Protect wells with covers
+• Keep animals away from sources
+• Test water quality regularly
+• Report contamination immediately
+
+**Testing Water Quality:**
+• Visual inspection (clear, no odor)
+• TDS meter testing
+• Bacterial testing kits
+• Contact local health department
+
+💡 **Quick Tip:** When in doubt about water safety, always boil it!`
+        }
       },
       hi: {
-        cholera: { keywords: ['हैजा', 'cholera', 'दस्त', 'उल्टी'], response: `**हैजा की जानकारी:**\n\nहैजा दूषित पानी से होने वाला गंभीर संक्रमण है।\n\nलक्षण: गंभीर दस्त, उल्टी, निर्जलीकरण\n\nउपचार: तुरंत ORS दें, डॉक्टर से मिलें\n\nरोकथाम: पानी उबालें, हाथ धोएं\n\nलक्षण दिखने पर तुरंत चिकित्सा लें!` },
-        prevention: { keywords: ['रोकथाम', 'बचाव', 'सुरक्षा'], response: `**रोग रोकथाम:**\n\nपानी: 1 मिनट उबालें, साफ बर्तन में रखें\n\nस्वच्छता: खाने से पहले साबुन से हाथ धोएं\n\nखाना: अच्छी तरह पकाएं, फल धोएं\n\nरोकथाम इलाज से बेहतर है!` },
-        emergency: { keywords: ['आपातकाल', 'emergency', 'मदद'], response: `**आपातकालीन नंबर:**\n\nएम्बुलेंस: 108\nस्वास्थ्य हेल्पलाइन: 104\nआपातकाल: 112\n\nसमय पर इलाज जीवन बचाता है!` }
+        cholera: {
+          keywords: ['हैजा', 'cholera', 'दस्त', 'उल्टी'],
+          response: `**हैजा - महत्वपूर्ण जानकारी:**
+
+📋 **हैजा क्या है?**
+हैजा विब्रियो कॉलेरी बैक्टीरिया से होने वाला एक गंभीर संक्रमण है जो दूषित पानी और भोजन से फैलता है।
+
+🔬 **लक्षण:**
+• गंभीर पानी जैसा दस्त
+• उल्टी
+• तेजी से निर्जलीकरण
+• मांसपेशियों में ऐंठन
+• कम रक्तचाप
+
+💊 **उपचार:**
+• तुरंत ORS (मौखिक पुनर्जलीकरण समाधान)
+• गंभीर मामलों में IV तरल पदार्थ
+• डॉक्टर द्वारा निर्धारित एंटीबायोटिक्स
+• जिंक सप्लीमेंट
+
+🛡️ **रोकथाम:**
+• केवल सुरक्षित, उबला पानी पिएं
+• बार-बार हाथ धोएं
+• भोजन को अच्छी तरह पकाएं
+• उचित स्वच्छता सुविधाओं का उपयोग करें
+
+⚕️ **लक्षण दिखने पर तुरंत चिकित्सा सहायता लें!**`
+        },
+        prevention: {
+          keywords: ['रोकथाम', 'बचाव', 'सुरक्षा', 'prevent'],
+          response: `**जल-जनित रोग रोकथाम मार्गदर्शिका:**
+
+💧 **सुरक्षित पानी:**
+• पानी को कम से कम 1 मिनट तक उबालें
+• वॉटर प्यूरीफिकेशन टैबलेट का उपयोग करें
+• पानी को साफ, ढके हुए बर्तनों में रखें
+
+🧼 **स्वच्छता:**
+• खाने से पहले साबुन से हाथ धोएं
+• शौचालय के बाद हाथ धोएं
+• चेहरे को गंदे हाथों से न छुएं
+
+🍲 **खाद्य सुरक्षा:**
+• भोजन को अच्छी तरह पकाएं
+• फल और सब्जियां धोएं
+• बासी भोजन न खाएं
+
+🏥 **स्वास्थ्य उपाय:**
+• टीकाकरण कराएं
+• नियमित स्वास्थ्य जांच
+• पौष्टिक आहार लें
+
+✅ **याद रखें:** रोकथाम हमेशा इलाज से बेहतर है!`
+        },
+        emergency: {
+          keywords: ['आपातकाल', 'emergency', 'मदद', 'help'],
+          response: `**🚨 आपातकालीन संपर्क:**
+
+**तत्काल नंबर:**
+📞 **एम्बुलेंस:** 108 / 102
+📞 **स्वास्थ्य हेल्पलाइन:** 104 / 1075
+📞 **आपातकालीन सेवाएं:** 112
+
+**कब कॉल करें:**
+🚨 बेहोशी या भ्रम
+🚨 गंभीर सांस लेने में कठिनाई
+🚨 104°F से ऊपर बुखार
+🚨 गंभीर निर्जलीकरण
+
+**आपातकालीन आने से पहले:**
+1. ✅ रोगी को आराम दें
+2. ✅ ORS जारी रखें
+3. ✅ लक्षण नोट करें
+
+⚕️ **समय पर चिकित्सा हस्तक्षेप जीवन बचाता है!**`
+        }
       },
       ta: {
-        cholera: { keywords: ['காலரா', 'cholera', 'வயிற்றுப்போக்கு'], response: `**காலரா தகவல்:**\n\nகாலரா மாசுபட்ட நீரிலிருந்து பரவும் தொற்று.\n\nஅறிகுறிகள்: கடுமையான வயிற்றுப்போக்கு, வாந்தி\n\nசிகிச்சை: ORS, மருத்துவர் ஆலோசனை\n\nஅறிகுறிகள் தோன்றினால் உடனே மருத்துவரை பாருங்கள்!` },
-        prevention: { keywords: ['தடுப்பு', 'பாதுகாப்பு'], response: `**நோய் தடுப்பு:**\n\nநீர்: 1 நிமிடம் கொதிக்கவைக்கவும்\nசுகாதாரம்: சாப்பிட முன் கைகளை கழுவவும்\nதடுப்பு எப்போதும் சிகிச்சையை விட சிறந்தது!` },
-        emergency: { keywords: ['அவசரம்', 'emergency'], response: `**அவசர தொடர்புகள்:**\n\nஆம்புலன்ஸ்: 108\nசுகாதார உதவி: 104\nஆபத்து: 112` }
+        cholera: {
+          keywords: ['காலரா', 'cholera', 'வயிற்றுப்போக்கு'],
+          response: `**காலரா - முக்கிய தகவல்:**
+
+📋 **காலரா என்றால் என்ன?**
+காலரா என்பது விப்ரியோ காலரே பாக்டீரியாவால் ஏற்படும் கடுமையான தொற்று நோயாகும்.
+
+🔬 **அறிகுறிகள்:**
+• கடுமையான நீர் போன்ற வயிற்றுப்போக்கு
+• வாந்தி
+• வேகமான நீரிழப்பு
+• தசை பிடிப்புகள்
+• குறைந்த இரத்த அழுத்தம்
+
+💊 **சிகிச்சை:**
+• உடனடியாக ORS
+• கடுமையான நீரிழப்புக்கு IV திரவங்கள்
+• மருத்துவர் பரிந்துரைத்த நுண்ணுயிர் எதிர்ப்பிகள்
+
+🛡️ **தடுப்பு:**
+• பாதுகாப்பான, கொதிக்கவைத்த தண்ணீர் குடிக்கவும்
+• அடிக்கடி கைகளை கழுவவும்
+• உணவை நன்றாக சமைக்கவும்
+
+⚕️ **அறிகுறிகள் தோன்றினால் உடனடியாக மருத்துவ உதவி பெறவும்!**`
+        },
+        prevention: {
+          keywords: ['தடுப்பு', 'பாதுகாப்பு', 'prevent'],
+          response: `**நீர்வழி நோய் தடுப்பு வழிகாட்டி:**
+
+💧 **பாதுகாப்பான நீர்:**
+• குறைந்தது 1 நிமிடம் தண்ணீரை கொதிக்கவைக்கவும்
+• சுத்திகரிப்பு மாத்திரைகளை பயன்படுத்தவும்
+• தண்ணீரை சுத்தமான பாத்திரங்களில் சேமிக்கவும்
+
+🧼 **சுகாதாரம்:**
+• சாப்பிடும் முன் சோப்பால் கைகளை கழுவவும்
+• கழிவறை பயன்பாட்டிற்கு பிறகு கைகளை கழுவவும்
+
+🍲 **உணவு பாதுகாப்பு:**
+• உணவை நன்றாக சமைக்கவும்
+• பழங்கள் மற்றும் காய்கறிகளை கழுவவும்
+
+✅ **நினைவில் கொள்ளுங்கள்:** தடுப்பு எப்போதும் சிகிச்சையை விட சிறந்தது!`
+        },
+        emergency: {
+          keywords: ['அவசரம்', 'emergency', 'உதவி', 'help'],
+          response: `**🚨 அவசர தொடர்புகள்:**
+
+**உடனடி எண்கள்:**
+📞 **ஆம்புலன்ஸ்:** 108 / 102
+📞 **சுகாதார ஹெல்ப்லைன்:** 104 / 1075
+📞 **அவசர சேவைகள்:** 112
+
+**எப்போது அழைக்க வேண்டும்:**
+🚨 மயக்கம் அல்லது குழப்பம்
+🚨 கடுமையான மூச்சுத்திணறல்
+🚨 104°F க்கு மேல் காய்ச்சல்
+
+⚕️ **சரியான நேரத்தில் மருத்துவ உதவி உயிரைக் காப்பாற்றும்!**`
+        }
       },
       te: {
-        cholera: { keywords: ['కలరా', 'cholera'], response: `**కలరా సమాచారం:**\n\nకలరా కలుషితమైన నీటి నుండి వ్యాపిస్తుంది.\n\nలక్షణాలు: తీవ్రమైన విరేచనాలు, వాంతులు\n\nచికిత్స: వెంటనే ORS, వైద్యుడిని సంప్రదించండి\n\nలక్షణాలు కనిపిస్తే వెంటనే వైద్యుడిని సందర్శించండి!` },
-        prevention: { keywords: ['నివారణ', 'రక్షణ'], response: `**నివారణ చర్యలు:**\n\nనీరు: 1 నిమిషం ఉడికించండి\nపరిశుభ్రత: తినడానికి ముందు చేతులు కడుక్కోండి\nనివారణ చికిత్స కంటే మంచిది!` },
-        emergency: { keywords: ['అత్యవసరం', 'emergency'], response: `**అత్యవసర నంబర్లు:**\n\nఆంబులెన్స్: 108\nఆరోగ్య హెల్ప్‌లైన్: 104\nఎమర్జెన్సీ: 112` }
+        cholera: {
+          keywords: ['కలరా', 'cholera', 'విరేచనాలు'],
+          response: `**కలరా - ముఖ్య సమాచారం:**
+
+📋 **కలరా అంటే ఏమిటి?**
+కలరా అనేది విబ్రియో కలరా బ్యాక్టీరియా వల్ల వచ్చే తీవ్రమైన సంక్రమణ.
+
+🔬 **లక్షణాలు:**
+• తీవ్రమైన నీటి విరేచనాలు
+• వాంతులు
+• వేగంగా నిర్జలీకరణం
+• కండరాల తిమ్మిరి
+• తక్కువ రక్తపోటు
+
+💊 **చికిత్స:**
+• వెంటనే ORS
+• తీవ్రమైన నిర్జలీకరణానికి IV ద్రవాలు
+• వైద్యుడు సూచించిన యాంటీబయాటిక్స్
+
+🛡️ **నివారణ:**
+• సురక్షితమైన, ఉడికించిన నీరు త్రాగండి
+• తరచుగా చేతులు కడుక్కోండి
+• ఆహారాన్ని బాగా వండండి
+
+⚕️ **లక్షణాలు కనిపిస్తే వెంటనే వైద్య సహాయం పొందండి!**`
+        },
+        prevention: {
+          keywords: ['నివారణ', 'రక్షణ', 'prevent'],
+          response: `**నీటి ద్వారా వచ్చే వ్యాధుల నివారణ మార్గదర్శి:**
+
+💧 **సురక్షితమైన నీరు:**
+• నీటిని కనీసం 1 నిమిషం ఉడికించండి
+• శుద్ధీకరణ మాత్రలు వాడండి
+• శుద్ధమైన పాత్రలలో నీటిని నిల్వ చేయండి
+
+🧼 **పరిశుభ్రత:**
+• తినడానికి ముందు సబ్బుతో చేతులు కడుక్కోండి
+• టాయిలెట్ ఉపయోగించిన తర్వాత చేతులు కడుక్కోండి
+
+🍲 **ఆహార భద్రత:**
+• ఆహారాన్ని బాగా వండండి
+• పండ్లు మరియు కూరగాయలను కడగండి
+
+✅ **గుర్తుంచుకోండి:** నివారణ ఎల్లప్పుడూ చికిత్స కంటే మంచిది!`
+        }
       },
       bn: {
-        cholera: { keywords: ['কলেরা', 'cholera', 'ডায়রিয়া'], response: `**কলেরার তথ্য:**\n\nকলেরা দূষিত পানি থেকে ছড়ায়।\n\nলক্ষণ: তীব্র ডায়রিয়া, বমি\n\nচিকিৎসা: ORS দিন, ডাক্তার দেখান\n\nলক্ষণ দেখা দিলে দ্রুত চিকিৎসা নিন!` },
-        prevention: { keywords: ['প্রতিরোধ', 'সুরক্ষা'], response: `**রোগ প্রতিরোধ:**\n\nপানি: ১ মিনিট ফোটান\nস্বাস্থ্যবিধি: খাওয়ার আগে হাত ধুয়ে নিন\nপ্রতিরোধ সবসময় চিকিৎসার চেয়ে ভালো!` },
-        emergency: { keywords: ['জরুরি', 'emergency', 'সাহায্য'], response: `**জরুরি যোগাযোগ:**\n\nঅ্যাম্বুলেন্স: 108\nস্বাস্থ্য হেল্পলাইন: 104\nজরুরি সেবা: 112` }
+        cholera: {
+          keywords: ['কলেরা', 'cholera', 'ডায়রিয়া'],
+          response: `**কলেরা - গুরুত্বপূর্ণ তথ্য:**
+
+📋 **কলেরা কি?**
+কলেরা ভিব্রিও কলেরি ব্যাকটেরিয়া দ্বারা সৃষ্ট একটি গুরুতর সংক্রমণ।
+
+🔬 **উপসর্গ:**
+• গুরুতর পানির মতো ডায়রিয়া
+• বমি
+• দ্রুত পানিশূন্যতা
+• পেশীতে খিঁচুনি
+• নিম্ন রক্তচাপ
+
+💊 **চিকিৎসা:**
+• অবিলম্বে ORS
+• গুরুতর পানিশূন্যতার জন্য IV তরল
+• ডাক্তারের পরামর্শ অনুযায়ী অ্যান্টিবায়োটিক
+
+🛡️ **প্রতিরোধ:**
+• নিরাপদ, ফুটানো পানি পান করুন
+• ঘন ঘন হাত ধুয়ে নিন
+• খাবার ভালোভাবে রান্না করুন
+
+⚕️ **উপসর্গ দেখা দিলে অবিলম্বে চিকিৎসা সহায়তা নিন!**`
+        },
+        prevention: {
+          keywords: ['প্রতিরোধ', 'সুরক্ষা', 'prevent'],
+          response: `**জল-বাহিত রোগ প্রতিরোধ নির্দেশিকা:**
+
+💧 **নিরাপদ পানি:**
+• কমপক্ষে 1 মিনিট পানি ফুটান
+• বিশুদ্ধকরণ ট্যাবলেট ব্যবহার করুন
+• পরিষ্কার পাত্রে পানি সংরক্ষণ করুন
+
+🧼 **পরিচ্ছন্নতা:**
+• খাওয়ার আগে সাবান দিয়ে হাত ধুয়ে নিন
+• টয়লেট ব্যবহারের পরে হাত ধুয়ে নিন
+
+🍲 **খাদ্য সুরক্ষা:**
+• খাবার ভালোভাবে রান্না করুন
+• ফল ও সবজি ধুয়ে নিন
+
+✅ **মনে রাখবেন:** প্রতিরোধ সবসময় চিকিৎসার চেয়ে ভাল!`
+        }
       }
     };
 
     function setChatLanguage(lang) {
       chatLanguage = lang;
-      document.querySelectorAll('.language-btn[id^="chatLang"]').forEach(btn => btn.classList.remove('active'));
+      
+      // Update button states
+      document.querySelectorAll('.language-btn[id^="chatLang"]').forEach(btn => {
+        btn.classList.remove('active');
+      });
       document.getElementById(`chatLang${lang.charAt(0).toUpperCase() + lang.slice(1)}`).classList.add('active');
+      
+      // Update welcome message based on language
+      const welcomeMessages = {
+        en: 'Hello! I\'m AISH, your health monitoring assistant. I can help you with waterborne diseases, prevention guidelines, treatment protocols, symptom identification, and emergency contacts. How can I assist you today?',
+        hi: 'नमस्ते! मैं AISH हूं, आपका स्वास्थ्य निगरानी सहायक। मैं आपको जल-जनित रोगों, रोकथाम दिशानिर्देशों, उपचार प्रोटोकॉल और आपातकालीन संपर्कों में मदद कर सकता हूं। मैं आपकी कैसे मदद कर सकता हूं?',
+        ta: 'வணக்கம்! நான் AISH, உங்கள் சுகாதார கண்காணிப்பு உதவியாளர். நீர்வழி நோய்கள், தடுப்பு வழிகாட்டுதல்கள், சிகிச்சை நெறிமுறைகள் மற்றும் அவசர தொடர்புகளில் உங்களுக்கு உதவ முடியும். இன்று நான் உங்களுக்கு எப்படி உதவ முடியும்?',
+        te: 'నమస్కారం! నేను AISH, మీ ఆరోగ్య పర్యవేక్షణ సహాయకుడను. నీటి ద్వారా వచ్చే వ్యాధులు, నివారణ మార్గదర్శకాలు, చికిత్స ప్రోటోకాల్స్ మరియు అత్యవసర పరిచయాలలో మీకు సహాయం చేయగలను. ఈరోజు నేను మీకు ఎలా సహాయం చేయగలను?',
+        bn: 'হ্যালো! আমি AISH, আপনার স্বাস্থ্য পর্যবেক্ষণ সহায়ক। আমি আপনাকে জল-বাহিত রোগ, প্রতিরোধ নির্দেশিকা, চিকিৎসা প্রোটোকল এবং জরুরি যোগাযোগে সাহায্য করতে পারি। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?'
+      };
+      
       showNotification(`Language changed to ${lang.toUpperCase()}`, 'success');
     }
     window.setChatLanguage = setChatLanguage;
@@ -2316,83 +3493,98 @@
     function sendChatMessage() {
       const input = document.getElementById('chatInput');
       const message = input.value.trim();
+      
       if (!message) return;
+      
+      // Add user message to chat
       addChatMessage(message, 'user');
       input.value = '';
+      
+      // Show thinking animation
       const chatMessages = document.getElementById('chatMessages');
       const thinkingDiv = document.createElement('div');
       thinkingDiv.className = 'bot-message';
       thinkingDiv.id = 'thinkingMessage';
-      thinkingDiv.innerHTML = `<div style="font-weight: 600; color: #3498db; margin-bottom: 8px; font-size: 13px;">🤖 AISH Assistant</div><div style="color: #2c3e50; font-size: 14px;">Analyzing<span class="ai-thinking"><span></span><span></span><span></span></span></div>`;
+      thinkingDiv.innerHTML = `
+        <div style="font-weight: 600; color: #3498db; margin-bottom: 8px; font-size: 13px;">🤖 AISH Assistant</div>
+        <div style="color: #2c3e50; font-size: 14px;">
+          Analyzing your question<span class="ai-thinking"><span></span><span></span><span></span></span>
+        </div>
+      `;
       chatMessages.appendChild(thinkingDiv);
       chatMessages.scrollTop = chatMessages.scrollHeight;
-      setTimeout(() => { thinkingDiv.remove(); addChatMessage(processUserMessage(message), 'bot'); }, 1500);
+      
+      // Process message and respond
+      setTimeout(() => {
+        thinkingDiv.remove();
+        const response = processUserMessage(message);
+        addChatMessage(response, 'bot');
+      }, 1500);
     }
     window.sendChatMessage = sendChatMessage;
 
-    function askQuickQuestion(question) { document.getElementById('chatInput').value = question; sendChatMessage(); }
+    function askQuickQuestion(question) {
+      document.getElementById('chatInput').value = question;
+      sendChatMessage();
+    }
     window.askQuickQuestion = askQuickQuestion;
 
     function processUserMessage(message) {
       const lowerMessage = message.toLowerCase();
       const kb = chatKnowledgeBase[chatLanguage] || chatKnowledgeBase.en;
+      
+      // Check for topic matches
       for (const [topic, data] of Object.entries(kb)) {
-        if (data.keywords.some(keyword => lowerMessage.includes(keyword.toLowerCase()))) return data.response;
+        if (data.keywords.some(keyword => lowerMessage.includes(keyword.toLowerCase()))) {
+          return data.response;
+        }
       }
-      const defaults = {
-        en: `I can help with: Cholera, Typhoid, Prevention, Symptoms, Treatment, Emergency contacts, Water safety.\n\nPlease ask about any of these topics!`,
-        hi: `मैं मदद कर सकता हूं: हैजा, टाइफाइड, रोकथाम, लक्षण, आपातकाल।\n\nकृपया इन विषयों के बारे में पूछें!`,
-        ta: `நான் உதவ முடியும்: காலரா, தடுப்பு, அவசரம்.\n\nதயவுசெய்து கேளுங்கள்!`,
-        te: `నేను సహాయం చేయగలను: కలరా, నివారణ, అత్యవసరం.\n\nదయచేసి అడగండి!`,
-        bn: `আমি সাহায্য করতে পারি: কলেরা, প্রতিরোধ, জরুরি পরিস্থিতি।\n\nঅনুগ্রহ করে জিজ্ঞাসা করুন!`
+      
+      // Default response based on language
+      const defaultResponses = {
+        en: `I understand you're asking about: "${message}"\n\nI can help you with:\n• Cholera information\n• Typhoid fever details\n• Dysentery guidance\n• Prevention methods\n• Treatment protocols\n• Emergency contacts\n• Water safety\n• Symptom identification\n\nPlease ask about any of these topics, or try one of the quick topic buttons below!`,
+        hi: `मैं समझता हूं कि आप पूछ रहे हैं: "${message}"\n\nमैं आपकी मदद कर सकता हूं:\n• हैजा की जानकारी\n• टाइफाइड विवरण\n• पेचिश मार्गदर्शन\n• रोकथाम के तरीके\n• उपचार प्रोटोकॉल\n• आपातकालीन संपर्क\n\nकृपया इन विषयों के बारे में पूछें!`,
+        ta: `நீங்கள் கேட்பது புரிகிறது: "${message}"\n\nநான் உங்களுக்கு உதவ முடியும்:\n• காலரா தகவல்\n• டைபாய்டு விவரங்கள்\n• வயிற்றுப்போக்கு வழிகாட்டுதல்\n• தடுப்பு முறைகள்\n• சிகிச்சை நெறிமுறைகள்\n• அவசர தொடர்புகள்\n\nதயவுசெய்து இந்த தலைப்புகளில் கேளுங்கள்!`,
+        te: `మీరు అడుగుతున్నది అర్థమైంది: "${message}"\n\nనేను మీకు సహాయం చేయగలను:\n• కలరా సమాచారం\n• టైఫాయిడ్ వివరాలు\n• విరేచనాల మార్గదర్శకత్వం\n• నివారణ పద్ధతులు\n• చికిత్స ప్రోటోకాల్స్\n• అత్యవసర పరిచయాలు\n\nదయచేసి ఈ అంశాల గురించి అడగండి!`,
+        bn: `আমি বুঝতে পারছি আপনি জিজ্ঞাসা করছেন: "${message}"\n\nআমি আপনাকে সাহায্য করতে পারি:\n• কলেরা তথ্য\n• টাইফয়েড বিবরণ\n• আমাশয় নির্দেশনা\n• প্রতিরোধের পদ্ধতি\n• চিকিৎসা প্রোটোকল\n• জরুরি যোগাযোগ\n\nঅনুগ্রহ করে এই বিষয়গুলি সম্পর্কে জিজ্ঞাসা করুন!`
       };
-      return defaults[chatLanguage] || defaults.en;
+      
+      return defaultResponses[chatLanguage] || defaultResponses.en;
     }
 
     function addChatMessage(message, type) {
       const chatMessages = document.getElementById('chatMessages');
       const messageDiv = document.createElement('div');
       messageDiv.className = `chat-message ${type}-message`;
+      
       if (type === 'bot') {
-        messageDiv.innerHTML = `<div style="font-weight: 600; color: #3498db; margin-bottom: 8px; font-size: 13px;">🤖 AISH Assistant</div><div style="color: #2c3e50; font-size: 14px; line-height: 1.6; white-space: pre-line;">${message}</div>`;
+        messageDiv.innerHTML = `
+          <div style="font-weight: 600; color: #3498db; margin-bottom: 8px; font-size: 13px;">🤖 AISH Assistant</div>
+          <div style="color: #2c3e50; font-size: 14px; line-height: 1.6; white-space: pre-line;">${message}</div>
+        `;
       } else {
-        messageDiv.innerHTML = `<div style="font-weight: 600; color: #2196f3; margin-bottom: 8px; font-size: 13px;">You</div><div style="color: #2c3e50; font-size: 14px; line-height: 1.6;">${message}</div>`;
+        messageDiv.innerHTML = `
+          <div style="font-weight: 600; color: #2196f3; margin-bottom: 8px; font-size: 13px;">You</div>
+          <div style="color: #2c3e50; font-size: 14px; line-height: 1.6;">${message}</div>
+        `;
       }
+      
       chatMessages.appendChild(messageDiv);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
+    // Toggle Chatbot Popup
     function toggleChatbot() {
-      document.getElementById('chatbotPopup').classList.toggle('active');
-      document.getElementById('chatbotToggle').classList.toggle('active');
+      const chatbotPopup = document.getElementById('chatbotPopup');
+      const chatbotToggle = document.getElementById('chatbotToggle');
+      
+      chatbotPopup.classList.toggle('active');
+      chatbotToggle.classList.toggle('active');
     }
     window.toggleChatbot = toggleChatbot;
 
+    // Load sync queue
     syncQueue = loadFromStorage('syncQueue') || [];
-
-    // =============================================
-    // KEEP RENDER SERVER AWAKE (ping every 10 mins)
-    // =============================================
-    function pingServer() {
-      fetch(`${API_URL}/health`)
-        .then(() => console.log('✓ Server is awake'))
-        .catch(() => console.log('⚠ Server sleeping, waking up...'));
-    }
-    // Ping immediately when page loads, then every 10 minutes
-    pingServer();
-    setInterval(pingServer, 10 * 60 * 1000);
-
-    // =============================================
-    // AUTO-REFRESH every 30 seconds
-    // This makes it a proper multi-user system —
-    // when User B submits a case, User A's screen
-    // updates automatically within 30 seconds.
-    // =============================================
-    setInterval(async () => {
-      if (serverAvailable && isOnline) {
-        await fetchAllCases();
-      }
-    }, 30 * 1000);
   </script>
 </body>
 </html>
