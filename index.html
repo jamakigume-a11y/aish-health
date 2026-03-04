@@ -1796,16 +1796,19 @@
         // This is handled by individual case operations now
         localStorage.setItem(key, JSON.stringify(data)); // Backup
       } catch (e) {
-        console.error('Storage error:', e);
+        console.warn('Storage error - clearing corrupted data:', e);
+        localStorage.removeItem(key);
       }
     }
 
     function loadFromStorage(key) {
       try {
         const data = localStorage.getItem(key);
-        return data ? JSON.parse(data) : null;
+        if (!data) return null;
+        return JSON.parse(data);
       } catch (e) {
-        console.error('Storage error:', e);
+        console.warn('Storage error - clearing corrupted data:', e);
+        localStorage.removeItem(key);
         return null;
       }
     }
@@ -1888,7 +1891,7 @@
       }
     }
 
-    async function deleteCase(caseId) {
+    async function deleteCaseFromAPI(caseId) {
       try {
         const response = await fetch(`${API_URL}/cases/${caseId}`, {
           method: 'DELETE'
@@ -2000,7 +2003,7 @@
       if (confirm(confirmMessage)) {
         if (caseToDelete._id && isOnline) {
           try {
-            await deleteCase(caseToDelete._id);
+            await deleteCaseFromAPI(caseToDelete._id);
             cases.splice(index, 1);
             showNotification(`✓ Case deleted from database: ${caseToDelete.name}`, 'success');
           } catch (error) {
